@@ -1,9 +1,15 @@
 # Project Description
 
-blah
+A 2d platformer video game that uses semi-realistic physics. 
 
 ## Needs to Have List
-- thing
+- Gravity that acts on the player
+- Momentum that acts on the player
+- Realistic collisions
+- A moving player
+- A scene that the player can interact with 
 
 ## Nice to Have List
-- thing
+- Projectile motion
+- At least one enemy
+
