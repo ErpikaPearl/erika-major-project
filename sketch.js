@@ -6,22 +6,30 @@
 // - describe what you did to take this project "above and beyond"
 
 let gridOne;
+let player;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  gridOne = new Grid(0);
+  gridOne = new Grid(0, 0);
   gridOne.generateEmpty();
+
+  player = new Player();
 }
 
 function draw() {
   background(220);
   
+
   gridOne.display();
+  player.display();
+
+  fill("blue");
+  rect(500, 500, 100, 100);
 }
 
 class Grid {
-  constructor(xOffset){
+  constructor(xOffset, yOffset){
     this.GRID_HEIGHT = 60;
     this.GRID_WIDTH = 120;
     
@@ -29,6 +37,9 @@ class Grid {
     this.cellSize = 10;
 
     this.xOffset = xOffset;
+    this.yOffset = yOffset;
+    this.xindent = (width - this.GRID_WIDTH * this.cellSize)/2;
+    this.yindent = (height - this.GRID_HEIGHT * this.cellSize)/2;
 
   }
 
@@ -68,9 +79,27 @@ class Grid {
         else{
           fill("white");
         }
-        rect(x*this.cellSize - this.xOffset, y*this.cellSize, this.cellSize, this.cellSize);
+        stroke(1);
+        rect(x*this.cellSize - this.xOffset + this.xindent, y*this.cellSize - this.xOffset + this.yindent, this.cellSize, this.cellSize);
       }
     }
+  }
+}
+
+class Player {
+  constructor(){
+    this.x = width/2;
+    this.y = height/2;
+    this.w = 30;
+    this.h = 50;
+
+    this.colour = "red";
+  }
+
+  display(){
+    fill(this.colour);
+    noStroke();
+    rect(this.x, this.y, this.w, this.h);
   }
 }
 
