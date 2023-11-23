@@ -23,9 +23,7 @@ function draw() {
 
   gridOne.display();
   player.display();
-
-  fill("blue");
-  rect(500, 500, 100, 100);
+  player.gravity();
 }
 
 class Grid {
@@ -92,6 +90,12 @@ class Player {
     this.y = height/2;
     this.w = 30;
     this.h = 50;
+    this.mass = 3;
+
+    this.gravitynum = 0;
+    this.gravityspeed = 2;
+    this.speedx = 0;
+    this.speedy = 2;
 
     this.colour = "red";
   }
@@ -100,6 +104,15 @@ class Player {
     fill(this.colour);
     noStroke();
     rect(this.x, this.y, this.w, this.h);
+  }
+
+  gravity(){
+    this.gravitynum += this.gravityspeed;
+    this.y += this.speedy * this.gravityspeed;
+  }
+
+  detectCollisions(){
+
   }
 }
 
