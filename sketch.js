@@ -7,12 +7,19 @@
 
 let gridOne;
 let player;
+let testGrid;
+
+let accelerationGravity = -9.8; //  m/s^2
+
+function preload(){
+  testGrid = loadJSON("Test Level.json");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
   gridOne = new Grid(0, 0);
-  gridOne.generateEmpty();
+  gridOne.generateFull();
 
   player = new Player();
 }
@@ -23,7 +30,7 @@ function draw() {
 
   gridOne.display();
   player.display();
-  player.gravity();
+  player.gravityReal();
 }
 
 class Grid {
@@ -52,6 +59,11 @@ class Grid {
       }
     }
     this.grid = randomArray;
+  }
+
+  generateFull(){
+    //  Generates a grid in size given from json File
+    this.grid = testGrid;
   }
   
   display(){
@@ -92,10 +104,18 @@ class Player {
     this.h = 50;
     this.mass = 3;
 
+    this.speedY = 0;
+    this.forceG = 0;
+    this.timei = 0;
+    this.timef = 0;
+    this.velocityYi = 0;
+    this.velocityYf = 0;
+
     this.gravitynum = 0;
     this.gravityspeed = 2;
     this.speedx = 0;
     this.speedy = 2;
+
 
     this.colour = "red";
   }
@@ -106,24 +126,22 @@ class Player {
     rect(this.x, this.y, this.w, this.h);
   }
 
-  gravity(){
-    this.gravitynum += this.gravityspeed;
-    this.y += this.speedy * this.gravityspeed;
+  // gravity(){
+  //   this.gravitynum += this.gravityspeed;
+  //   this.y += this.speedy * this.gravityspeed;
+  // }
+
+  gravityReal(){
+    this.timei = millis();
+    // this.forceG = this.mass * this.gravity / 2; //  Calculates the value of the grvaitational force
+    this.velocityYf = accelerationGravity*(millis() - this.timei) + this.velocityYi;   //  Kinematics equation to find fiinal velocity
+    
+    this.y = this.velocityYf;
+    this.velocityYi = this.velocityYf;
+    this.velocityYf = 0;
   }
 
-  detectCollisions(){
-
-  }
+  // detectCollisions(){
+    
+  // }
 }
-
-// class Veiw {
-//   constructor(){
-
-//   }
-// }
-
-// class conroller {
-//   constructor(){
-
-//   }
-// }
