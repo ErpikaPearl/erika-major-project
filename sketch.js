@@ -7,7 +7,7 @@
 
 let gridOne;
 let player;
-let testGrid;
+let testGrid = [];
 
 let accelerationGravity = -9.8; //  m/s^2
 
@@ -22,6 +22,7 @@ function setup() {
   gridOne.generateFull();
 
   player = new Player();
+  
 }
 
 function draw() {
@@ -30,7 +31,7 @@ function draw() {
 
   gridOne.display();
   player.display();
-  player.gravityReal();
+  player.gravityHeight();
 }
 
 class Grid {
@@ -104,18 +105,22 @@ class Player {
     this.h = 50;
     this.mass = 3;
 
-    this.speedY = 0;
-    this.forceG = 0;
-    this.timei = 0;
-    this.timef = 0;
-    this.velocityYi = 0;
-    this.velocityYf = 0;
+    // this.speedY = 0;
+    // this.forceG = 0;
+    // this.timei = 0;
+    // this.timef = 0;
+    // this.velocityYi = 0;
+    // this.velocityYf = 0;
 
-    this.gravitynum = 0;
-    this.gravityspeed = 2;
-    this.speedx = 0;
-    this.speedy = 2;
+    // this.gravitynum = 0;
+    // this.gravityspeed = 2;
+    // this.speedx = 0;
+    // this.speedy = 2;
 
+    // this.lastSwitched = 0;
+    // this.waitTime = 2000;
+
+    this.heightUp = 0;
 
     this.colour = "red";
   }
@@ -126,22 +131,52 @@ class Player {
     rect(this.x, this.y, this.w, this.h);
   }
 
-  // gravity(){
-  //   this.gravitynum += this.gravityspeed;
-  //   this.y += this.speedy * this.gravityspeed;
-  // }
 
-  gravityReal(){
-    this.timei = millis();
-    // this.forceG = this.mass * this.gravity / 2; //  Calculates the value of the grvaitational force
-    this.velocityYf = accelerationGravity*(millis() - this.timei) + this.velocityYi;   //  Kinematics equation to find fiinal velocity
-    
-    this.y = this.velocityYf;
-    this.velocityYi = this.velocityYf;
-    this.velocityYf = 0;
+  // gravityReal(){
+  //   this.timei = frameCount;
+  //   // this.forceG = this.mass * this.gravity / 2; //  Calculates the value of the grvaitational force
+  //   if (frameCount > this.lastSwitched + this.waitTime){
+  //     this.velocityYf = accelerationGravity*(frameCount - this.timei) + this.velocityYi;   //  Kinematics equation to find fiinal velocity
+  //     this.lastSwitched = frameCount;
+  //     this.y = this.velocityYf;
+  //     this.velocityYi = this.velocityYf;
+  //     this.velocityYf = 0;
+  //   }
+  // }
+  
+  gravityHeight(){
+    let xVal = Math.floor((this.x + this.w/2)/gridOne.GRID_WIDTH);
+    let yVal = Math.floor((this.y + this.h)/gridOne.GRID_HEIGHT);
+
+    this.heightUp = checkHeightActivation(xVal, yVal, testGrid, 1);
+    console.log(this.heightUp);
   }
+}
 
-  // detectCollisions(){
-    
-  // }
+function checkHeightActivation(x, y, grid, state){
+  //  Activates the checkHeight fucntion
+
+  let counter = 0;
+
+  if (grid[y][x] !== state){
+    checkHeight(x, y, grid, state, counter);
+  }
+}
+
+function checkHeight(x, y, grid, state, counter){
+  //  Draws a vertical or horizontal line
+
+  //  Get size of grid
+  let rows = grid.length;
+  let cols = grid[y+1].length;
+  
+  // Base case: outside of grid or the square is already coloured 
+  if (x < 0 || x >= rows || y < 0 || y >= cols || grid[y][x] === state){
+    return counter;
+  }
+  else {
+    counter++;
+    checkHeight(x, y+1, grid, state, counter);  //  Vertical line
+    checkHeight(x, y-1, grid, state, counter);
+  }
 }
