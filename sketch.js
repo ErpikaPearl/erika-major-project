@@ -149,18 +149,19 @@ class Player {
     let yVal = Math.floor((this.y + this.h)/gridOne.GRID_HEIGHT);
 
     this.heightUp = checkHeightActivation(xVal, yVal, testGrid, 1);
+    
     console.log(this.heightUp);
   }
 }
 
 function checkHeightActivation(x, y, grid, state){
   //  Activates the checkHeight fucntion
-
   let counter = 0;
 
   if (grid[y][x] !== state){
-    checkHeight(x, y, grid, state, counter);
+    counter = checkHeight(x, y, grid, state, counter);
   }
+  return counter;
 }
 
 function checkHeight(x, y, grid, state, counter){
@@ -175,8 +176,7 @@ function checkHeight(x, y, grid, state, counter){
     return counter;
   }
   else {
-    counter++;
+    counter ++;
     checkHeight(x, y+1, grid, state, counter);  //  Vertical line
-    checkHeight(x, y-1, grid, state, counter);
   }
 }
