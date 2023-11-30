@@ -179,4 +179,5 @@ function checkHeight(x, y, grid, state, counter){
     counter ++;
     checkHeight(x, y+1, grid, state, counter);  //  Vertical line
   }
+  // return counter;
 }
