@@ -150,7 +150,7 @@ class Player {
 
     this.heightUp = checkHeightActivation(xVal, yVal, testGrid, 1);
     
-    console.log(this.heightUp);
+    // console.log(this.heightUp);
   }
 }
 
@@ -179,5 +179,4 @@ function checkHeight(x, y, grid, state, counter){
     counter ++;
     checkHeight(x, y+1, grid, state, counter);  //  Vertical line
   }
-  // return counter;
 }
