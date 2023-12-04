@@ -148,35 +148,52 @@ class Player {
     let xVal = Math.floor((this.x + this.w/2)/gridOne.GRID_WIDTH);
     let yVal = Math.floor((this.y + this.h)/gridOne.GRID_HEIGHT);
 
-    this.heightUp = checkHeightActivation(xVal, yVal, testGrid, 1);
-    
-    // console.log(this.heightUp);
+    // this.heightUp = checkHeightActivation(xVal, yVal, testGrid, 1);
+    this.heightUp = findHeight(xVal, yVal, testGrid, 1);
+    console.log(this.heightUp);
   }
 }
 
-function checkHeightActivation(x, y, grid, state){
-  //  Activates the checkHeight fucntion
+function findHeight(x, y, grid, state){
   let counter = 0;
-
-  if (grid[y][x] !== state){
-    counter = checkHeight(x, y, grid, state, counter);
+  for (let colm = y; colm <= grid.length; colm++) {
+    if (grid[colm][x] === state){
+      console.log("return");
+      return counter;
+    }
+    else{
+      console.log(counter);
+      counter ++;
+    }
   }
-  return counter;
 }
 
-function checkHeight(x, y, grid, state, counter){
-  //  Draws a vertical or horizontal line
+// function checkHeightActivation(x, y, grid, state){
+//   //  Activates the checkHeight fucntion
+//   let theCount = 0;
 
-  //  Get size of grid
-  let rows = grid.length;
-  let cols = grid[y+1].length;
+//   if (grid[y][x] !== state){
+//     theCount = checkHeight(x, y, grid, state, theCount);
+//     console.log(theCount);
+//   }
+//   return theCount;
+// }
+
+// function checkHeight(x, y, grid, state, counter){
+//   //  Draws a vertical or horizontal line
+
+//   //  Get size of grid
+//   let rows = grid.length;
+//   let cols = grid[y+1].length;
   
-  // Base case: outside of grid or the square is already coloured 
-  if (x < 0 || x >= rows || y < 0 || y >= cols || grid[y][x] === state){
-    return counter;
-  }
-  else {
-    counter ++;
-    checkHeight(x, y+1, grid, state, counter);  //  Vertical line
-  }
-}
+//   // Base case: outside of grid or the square is already coloured 
+//   if (x < 0 || x >= rows || y < 0 || y >= cols || grid[y][x] === state){
+//     console.log(counter);
+//     return counter;
+//   }
+//   else {
+//     counter ++;
+//     checkHeight(x, y+1, grid, state, counter);  //  Vertical line
+    
+//   }
+// }
