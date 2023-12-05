@@ -154,18 +154,20 @@ class Player {
   }
 }
 
-function findHeight(x, y, grid, state){
+function findHeight(x, y, grid, state){ //  ERROR! MAKE TEST GRID INTO AN ARRAY
   let counter = 0;
+  // console.log(y);
   for (let colm = y; colm <= grid.length; colm++) {
     if (grid[colm][x] === state){
-      console.log("return");
+      // console.log("return");
       return counter;
     }
     else{
-      console.log(counter);
+      // console.log(counter);
       counter ++;
     }
   }
+  return counter;
 }
 
 // function checkHeightActivation(x, y, grid, state){
