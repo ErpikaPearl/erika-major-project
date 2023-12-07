@@ -11,6 +11,7 @@ let playerJumpSpeed = 5;
 
 function setup() {
   new Canvas(windowWidth, windowHeight);
+  angleMode(DEGREES);
   world.gravity.y = 9.8;  //  m/s^2
 
   ground = new Sprite();
@@ -39,11 +40,13 @@ function detectPlayerImput(){
   //  Player Movements
   if (player.colliding(ground)){
     if (keyIsDown(32)){  //  SPACE (JUMP)
-      player.vel.y = -playerJumpSpeed;
+      player.bearing = -90;
+      player.applyForce(6);
     }
   }
   if (keyIsDown(65) || keyIsDown(LEFT_ARROW)){  //  A (LEFT)
-    player.vel.x = -playerspeed;
+    player.bearing = 180;
+    player.applyForce(6);
   }
   else if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)){  // D (RIGHT)
     player.vel.x = playerspeed;
