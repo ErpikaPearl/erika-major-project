@@ -20,15 +20,16 @@ function setup() {
   ground.y = windowHeight + windowHeight/8;
   ground.color = "black";
   ground.collider = "static";
+  ground.friction = 4;
 
   player = new Sprite();
   player.width = 50;
   player.height = 70;
-  player.mass = 200;
+  player.mass = 0.5;
   player.color = "red";
   player.collider = "dynamic";
   player.rotationLock = true;
-
+  
 }
 
 function draw() {
@@ -36,39 +37,33 @@ function draw() {
   detectPlayerImput();
 }
 
-function detectPlayerImput(){
-  //  Player Movements
+function keyPressed(){
   if (player.colliding(ground)){
-    if (keyIsDown(32)){  //  SPACE (JUMP)
+    player.drag = 0;
+    if (keyCode === 32){
       player.bearing = -90;
-      player.applyForce(6);
+      player.applyForce(150);
+      console.log("do");
     }
   }
-  if (keyIsDown(65) || keyIsDown(LEFT_ARROW)){  //  A (LEFT)
-    player.bearing = 180;
-    player.applyForce(6);
-  }
-  else if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)){  // D (RIGHT)
-    player.vel.x = playerspeed;
+  else if (keyCode === 65 || keyIsDown(LEFT_ARROW) || keyIsDown(68) || keyIsDown(RIGHT_ARROW)){
+    player.drag = 4;
   }
   else{
-    player.vel.x = 0;
+    player.drag = 0;
   }
 }
 
-// function keyPressed(){
-//   //  Player Movements
-//   if (keyCode === 32){  //  SPACE (JUMP)
-//     player.vel.y -= playerspeed;
-//     console.log("up");
-//   }
-//   if (keyCode === 65 || keyCode === LEFT_ARROW){  //  A (LEFT)
-//     player.vel.x -= playerspeed;
-//     console.log("left");
-//   }
-//   if (keyCode === 68 || keyCode === RIGHT_ARROW){  // D (RIGHT)
-//     player.vel.x += playerspeed;
-//     console.log("right");
-//   }
-// }
-
+function detectPlayerImput(){
+  //  Player Movements
+  
+  if (keyIsDown(65) || keyIsDown(LEFT_ARROW)){  //  A (LEFT)
+    player.bearing = 180;
+    player.applyForce(15);
+    
+  }
+  else if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)){  // D (RIGHT)
+    player.bearing = 0;
+    player.applyForce(15);
+  }
+}
