@@ -8,6 +8,7 @@ A 2d platformer video game that uses semi-realistic physics. The player should b
 - Realistic-ish collisions
 - A moving player
 - A scene that the player can interact with and move inside
+- Sound affects and background music
 
 ## Nice to Have List
 - Projectile motion

@@ -1,19 +1,19 @@
-let drone, floor;
+let dots;
 
 function setup() {
-  new Canvas(100, 500);
-  world.gravity.y = 4;
+	new Canvas(500, 50);
 
-  drone = new Sprite(50, 0, 40, 10);
+	dots = new Group();
+	dots.color = 'yellow';
+	dots.y = 25;
+	dots.diameter = 10;
 	
-  floor = new Sprite(50, 498, 100, 6, "s");
+	while (dots.length < 5000) {
+		let dotThing = new dots.Sprite();
+		dotThing.x = dots.length * 20;
+	}
 }
 
 function draw() {
-  background(16);
-
-  if (mouse.pressing()) {
-    drone.bearing = -90;
-    drone.applyForce(6);
-  }
+	clear();
 }
