@@ -5,7 +5,9 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let player, ground, dots;
+let player, ground, dots, testOB;
+let solidsGroup;
+
 let playerMaxSpeed = 10;
 
 let cameraMovement = 50;
@@ -22,7 +24,7 @@ function setup() {
   ground.x = 0;
   ground.color = "black";
   ground.collider = "static";
-  ground.friction = 6;
+  ground.friction = 4;
   ground.bounciness = 0;
 
   player = new Sprite();
@@ -34,6 +36,14 @@ function setup() {
   player.rotationLock = true;
   player.bounciness = 0;
 
+  testOB= new Sprite();
+  testOB.width = 100;
+  testOB.height = 120;
+  testOB.collider = "static";
+  testOB.color = "black"
+  testOB.x = width/2;
+  testOB.y = height - height/5;
+
   dots = new Group();
 	dots.color = 'yellow';
 	dots.y = ground.y;
@@ -44,6 +54,7 @@ function setup() {
 		let dotThing = new dots.Sprite();
 		dotThing.x = dots.length * 200;
 	}
+
 }
 
 function draw() {
@@ -55,7 +66,7 @@ function draw() {
 }
 
 function keyPressed(){
-  if (player.colliding(ground)){  //  Jump only when touching ground
+  if (player.colliding(ground) || player.colliding(testOB)){  //  Jump only when touching ground
     if (keyCode === 32){
       player.applyForceScaled(0, -400);
     }
@@ -80,7 +91,7 @@ function keyPressed(){
 function detectPlayerImput(){
   //  Player Movements
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
-    if (player.colliding(ground)){
+    if (player.colliding(ground) || player.colliding(testOB)){
       player.applyForceScaled(-50, 0);
     }
     else{
@@ -88,11 +99,20 @@ function detectPlayerImput(){
     }
   }
   else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= playerMaxSpeed){  // D (RIGHT)
-    if (player.colliding(ground)){
+    if (player.colliding(ground) || player.colliding(testOB)){
       player.applyForceScaled(50, 0);
     }
     else{
       player.applyForceScaled(5, 0);
     }
+  }
+  //  Slows down player when they stop walking
+  else if(player.vel.x > 0){
+    player.vel.x --;
+    // console.log(player.vel.x);
+  }
+  else if(player.vel.x < 0){
+    player.vel.x ++;
+    // console.log(player.vel.x);
   }
 }
