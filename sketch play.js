@@ -6,7 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 
 let player, ground, dots, testOB;
-let solidsGroup;
+let solidsGroup = [];
 
 let playerMaxSpeed = 10;
 
@@ -40,20 +40,23 @@ function setup() {
   testOB.width = 100;
   testOB.height = 120;
   testOB.collider = "static";
-  testOB.color = "black"
+  testOB.color = "black";
   testOB.x = width/2;
   testOB.y = height - height/5;
 
   dots = new Group();
-	dots.color = 'yellow';
-	dots.y = ground.y;
-	dots.diameter = 10;
-  dots.collider = "static"
+  dots.color = "yellow";
+  dots.y = ground.y;
+  dots.diameter = 10;
+  dots.collider = "static";
+
+  solidsGroup.push(ground);
+  solidsGroup.push(testOB);
 	
-	while (dots.length <=  ground.width/200) {
-		let dotThing = new dots.Sprite();
-		dotThing.x = dots.length * 200;
-	}
+  while (dots.length <=  ground.width/200) {
+    let dotThing = new dots.Sprite();
+    dotThing.x = dots.length * 200;
+  }
 
 }
 
@@ -66,9 +69,23 @@ function draw() {
 }
 
 function keyPressed(){
-  if (player.colliding(ground) || player.colliding(testOB)){  //  Jump only when touching ground
+  //  Player Movements
+  if (player.colliding(ground) || player.colliding(testOB)){  //  (SPACE) Jump only when touching ground
     if (keyCode === 32){
       player.applyForceScaled(0, -400);
+    }
+  }
+  if (keyCode === 16){  //  (SHIFT) Dash in the direction player is facing
+    let timeInitial = 0;
+    let waitTime = 4000;
+    if (millis() > waitTime + timeInitial){
+      if (player.bearing === 360){
+        player.applyForceScaled(800, 0);
+      }
+      else if (player.bearing === 180){
+        player.applyForceScaled(-800, 0);
+      }
+      timeInitial = millis();
     }
   }
 
@@ -76,13 +93,12 @@ function keyPressed(){
   // else if (keyCode === 87 || keyCode === 38){  // W (UP)
   //   let timeInitial = millis();
   //   let waitTime = 1000;
-    
   //   if ((keyIsDown(87) || keyIsDown(UP_ARROW)) && player.vel === 0){  // W (UP)
-  //     console.log(camera.x)
+  //     console.log(camera.x);
   //     if (timeInitial < waitTime + millis()){
-  //       for (let x = camera.x; x <= camera.x + cameraMovement; x++)
-  //       camera.x ++;
-        
+  //       for (let x = camera.x; x <= camera.x + cameraMovement; x++) {
+  //         camera.x ++;
+  //       }
   //     }
   //   }
   // }
@@ -90,29 +106,31 @@ function keyPressed(){
 
 function detectPlayerImput(){
   //  Player Movements
-  if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
-    if (player.colliding(ground) || player.colliding(testOB)){
-      player.applyForceScaled(-50, 0);
+  for (let i = 0; i < solidsGroup.length; i++){
+    if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
+      player.bearing = 180;
+      if (player.colliding(solidsGroup[i]) && player.y < solidsGroup[i].y){
+        player.applyForceScaled(-50, 0);
+      }
+      else{
+        player.applyForceScaled(-5, 0);
+      }
     }
-    else{
-      player.applyForceScaled(-5, 0);
+    else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= playerMaxSpeed){  // D (RIGHT)
+      player.bearing = 360;
+      if (player.colliding(solidsGroup[i]) && player.y < solidsGroup[i].y){
+        player.applyForceScaled(50, 0);
+      }
+      else{
+        player.applyForceScaled(5, 0);
+      }
     }
-  }
-  else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= playerMaxSpeed){  // D (RIGHT)
-    if (player.colliding(ground) || player.colliding(testOB)){
-      player.applyForceScaled(50, 0);
+    //  Slows down player when they stop walking
+    else if(player.vel.x > 0){
+      player.vel.x --;
     }
-    else{
-      player.applyForceScaled(5, 0);
+    else if(player.vel.x < 0){
+      player.vel.x ++;
     }
-  }
-  //  Slows down player when they stop walking
-  else if(player.vel.x > 0){
-    player.vel.x --;
-    // console.log(player.vel.x);
-  }
-  else if(player.vel.x < 0){
-    player.vel.x ++;
-    // console.log(player.vel.x);
   }
 }
