@@ -9,6 +9,8 @@ let player, ground, dots, testOB;
 let solidsGroup = [];
 
 let playerMaxSpeed = 10;
+let doubleJump = true;
+let isOnGround = true;
 
 let cameraMovement = 50;
 
@@ -70,11 +72,18 @@ function draw() {
 
 function keyPressed(){
   //  Player Movements
-  if (player.colliding(ground) || player.colliding(testOB)){  //  (SPACE) Jump only when touching ground
-    if (keyCode === 32){
-      player.applyForceScaled(0, -400);
+  if (keyCode === 32){  //  (SPACE) Jump
+    for (let i = 0; i < solidsGroup.length; i++){
+      if (player.colliding(solidsGroup[i])){
+        player.applyForceScaled(0, -400);
+      }
+      else if (doubleJump === true){
+        player.applyForceScaled(0, -300);
+        doubleJump = false;
+      }
     }
   }
+  
   if (keyCode === 16){  //  (SHIFT) Dash in the direction player is facing
     let timeInitial = 0;
     let waitTime = 4000;
@@ -106,31 +115,44 @@ function keyPressed(){
 
 function detectPlayerImput(){
   //  Player Movements
+  if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
+    if (isOnGround){
+      player.applyForceScaled(-50, 0);
+    }
+    else{
+      player.applyForceScaled(-5, 0);
+    }
+  }
+  else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= playerMaxSpeed){  // D (RIGHT)
+    player.bearing = 360;
+    if (isOnGround){
+      player.applyForceScaled(50, 0);
+    }
+    else{
+      player.applyForceScaled(5, 0);
+    }
+  }
+  //  Slows down player when they stop walking
+  else if(player.vel.x > 0){
+    player.vel.x --;
+  }
+  else if(player.vel.x < 0){
+    player.vel.x ++;
+  }
+}
+
+function managePlayerStates(){
   for (let i = 0; i < solidsGroup.length; i++){
-    if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
-      player.bearing = 180;
-      if (player.colliding(solidsGroup[i]) && player.y < solidsGroup[i].y){
-        player.applyForceScaled(-50, 0);
-      }
-      else{
-        player.applyForceScaled(-5, 0);
-      }
+    if (player.colliding(solidsGroup[i])){  //  If touching any solid object
+      isOnGround = true;
+      doubleJump = true;
     }
-    else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= playerMaxSpeed){  // D (RIGHT)
-      player.bearing = 360;
-      if (player.colliding(solidsGroup[i]) && player.y < solidsGroup[i].y){
-        player.applyForceScaled(50, 0);
-      }
-      else{
-        player.applyForceScaled(5, 0);
-      }
-    }
-    //  Slows down player when they stop walking
-    else if(player.vel.x > 0){
-      player.vel.x --;
-    }
-    else if(player.vel.x < 0){
-      player.vel.x ++;
-    }
+  }
+
+  if (player.vel.x < 0){  //  If moving left
+    player.bearing = 360;
+  }
+  else if (player.vel.x > 0){  //  If moving right
+    player.bearing = 180;
   }
 }
