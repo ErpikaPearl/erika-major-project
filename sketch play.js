@@ -10,6 +10,8 @@ let solidsGroup = [];
 
 let playerMaxSpeed = 10;
 let doubleJump = false;
+let dash = true;
+let lastSwitchedDash = 0;
 let isOnGround = false;
 
 let cameraMovement = 50;
@@ -66,7 +68,7 @@ function draw() {
   clear();
   managePlayerStates();
   detectPlayerImput();
-  
+
   camera.x = player.x;
   camera.y = player.y; 
 }
@@ -84,17 +86,17 @@ function keyPressed(){
     }
   }
   
-  if (keyCode === 16){  //  (SHIFT) Dash in the direction player is facing
-    let timeInitial = 0;
-    let waitTime = 4000;
-    if (millis() > waitTime + timeInitial){
+  if (keyCode === 16 && dash){  //  (SHIFT) Dash in the direction player is facing
+    let waitTime = 2000;
+    
+    if (millis() > waitTime + lastSwitchedDash){
       if (player.bearing === 360){
         player.applyForceScaled(800, 0);
       }
       else if (player.bearing === 180){
         player.applyForceScaled(-800, 0);
       }
-      timeInitial = millis();
+      lastSwitchedDash = millis();
     }
   }
 
@@ -135,22 +137,27 @@ function detectPlayerImput(){
     }
   }
   //  Slows down player when they stop walking
-  else if(player.vel.x > 0){
+  else if(player.vel.x > 0 && player.bearing === 360){
     player.vel.x --;
   }
-  else if(player.vel.x < 0){
+  else if(player.vel.x < 0 && player.bearing === 180){
     player.vel.x ++;
   }
 }
 
 function managePlayerStates(){
+  isOnGround = false;
   for (let i = 0; i < solidsGroup.length; i++){
     if (player.colliding(solidsGroup[i])){  //  If touching any solid object
-      isOnGround = true;
       doubleJump = true;
+      isOnGround = true;
     }
-    else{
-      isOnGround = false;
-    }
+  }
+}
+
+function coolDown(waitTime, lastSwitched, ability){
+  if (millis() > waitTime + lastSwitched){
+    ability = !ability;
+    lastSwitched = millis();
   }
 }
