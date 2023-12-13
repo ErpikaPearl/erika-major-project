@@ -9,8 +9,8 @@ let player, ground, dots, testOB;
 let solidsGroup = [];
 
 let playerMaxSpeed = 10;
-let doubleJump = true;
-let isOnGround = true;
+let doubleJump = false;
+let isOnGround = false;
 
 let cameraMovement = 50;
 
@@ -52,8 +52,8 @@ function setup() {
   dots.diameter = 10;
   dots.collider = "static";
 
-  solidsGroup.push(ground);
   solidsGroup.push(testOB);
+  solidsGroup.push(ground);
 	
   while (dots.length <=  ground.width/200) {
     let dotThing = new dots.Sprite();
@@ -64,6 +64,7 @@ function setup() {
 
 function draw() {
   clear();
+  managePlayerStates();
   detectPlayerImput();
   
   camera.x = player.x;
@@ -73,14 +74,13 @@ function draw() {
 function keyPressed(){
   //  Player Movements
   if (keyCode === 32){  //  (SPACE) Jump
-    for (let i = 0; i < solidsGroup.length; i++){
-      if (player.colliding(solidsGroup[i])){
-        player.applyForceScaled(0, -400);
-      }
-      else if (doubleJump === true){
-        player.applyForceScaled(0, -300);
-        doubleJump = false;
-      }
+    if (isOnGround){
+      player.applyForceScaled(0, -400);
+      
+    }
+    else if (doubleJump && !isOnGround){
+      player.applyForceScaled(0, -300);
+      doubleJump = false;
     }
   }
   
@@ -114,8 +114,10 @@ function keyPressed(){
 }
 
 function detectPlayerImput(){
+  // console.log(isOnGround);
   //  Player Movements
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
+    player.bearing = 180;
     if (isOnGround){
       player.applyForceScaled(-50, 0);
     }
@@ -147,12 +149,8 @@ function managePlayerStates(){
       isOnGround = true;
       doubleJump = true;
     }
-  }
-
-  if (player.vel.x < 0){  //  If moving left
-    player.bearing = 360;
-  }
-  else if (player.vel.x > 0){  //  If moving right
-    player.bearing = 180;
+    else{
+      isOnGround = false;
+    }
   }
 }
