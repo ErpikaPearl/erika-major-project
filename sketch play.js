@@ -71,6 +71,7 @@ function draw() {
 
   camera.x = player.x;
   camera.y = player.y; 
+
 }
 
 function keyPressed(){
@@ -87,7 +88,7 @@ function keyPressed(){
   }
   
   if (keyCode === 16 && dash){  //  (SHIFT) Dash in the direction player is facing
-    let waitTime = 2000;
+    let waitTime = 1000;
     
     if (millis() > waitTime + lastSwitchedDash){
       if (player.bearing === 360){
@@ -137,10 +138,10 @@ function detectPlayerImput(){
     }
   }
   //  Slows down player when they stop walking
-  else if(player.vel.x > 0 && player.bearing === 360){
+  else if(player.vel.x > 0 && player.bearing === 360 && isOnGround){
     player.vel.x --;
   }
-  else if(player.vel.x < 0 && player.bearing === 180){
+  else if(player.vel.x < 0 && player.bearing === 180 && isOnGround){
     player.vel.x ++;
   }
 }
