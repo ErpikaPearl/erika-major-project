@@ -19,6 +19,7 @@ let cameraMovement = 50;
 function setup() {
   new Canvas(windowWidth, windowHeight);
   angleMode(DEGREES);
+  rectMode(CENTER);
   world.gravity.y = 9.8;  //  m/s^2
 
   ground = new Sprite();
@@ -72,6 +73,11 @@ function draw() {
   camera.x = player.x;
   camera.y = player.y; 
 
+  camera.off();
+  rect(50, 50, 60, 60);
+  rect(120, 50, 40, 40);
+  rect(170, 50, 40, 40);
+  rect(220, 50, 40, 40);
 }
 
 function keyPressed(){
