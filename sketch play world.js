@@ -5,7 +5,8 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let player, ground, dots, testOB;
+let player, ground, dots, testOB, orgin;
+let levelOne;
 let solidsGroup = [];
 
 let playerMaxSpeed = 10;
@@ -21,11 +22,24 @@ function setup() {
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;  //  m/s^2
+  camera.zoom = 0.1;
+
+  levelOne = new Group();
+  levelOne.color = "green";
+  levelOne.collider = "static";
+
+  let lvlOneGround = new levelOne.Sprite();
+  lvlOneGround.color = "orange";
+  lvlOneGround.collider = "n";
+  lvlOneGround.x = 0;
+  lvlOneGround.y = 0;
+  lvlOneGround.width = 7000;
+  lvlOneGround.height = 2000;
 
   ground = new Sprite();
   ground.width = windowWidth*30;
   ground.height = 500;
-  ground.y = windowHeight + windowHeight/8;
+  ground.y = windowHeight + windowHeight/8 + 600;
   ground.x = 0;
   ground.color = "black";
   ground.collider = "static";
@@ -41,13 +55,19 @@ function setup() {
   player.rotationLock = true;
   player.bounciness = 0;
 
-  testOB= new Sprite();
-  testOB.width = 100;
-  testOB.height = 120;
-  testOB.collider = "static";
-  testOB.color = "black";
-  testOB.x = width/2;
-  testOB.y = height - height/5;
+  // testOB= new Sprite();
+  // testOB.width = 100;
+  // testOB.height = 120;
+  // testOB.collider = "static";
+  // testOB.color = "black";
+  // testOB.x = width/2;
+  // testOB.y = height - height/5;
+
+  orgin = new Sprite();
+  orgin.diameter = 60;
+  orgin.x = 0;
+  orgin.y = 0;
+  orgin.collider = "static";
 
   dots = new Group();
   dots.color = "yellow";
@@ -55,7 +75,7 @@ function setup() {
   dots.diameter = 10;
   dots.collider = "static";
 
-  solidsGroup.push(testOB);
+  // solidsGroup.push(testOB);
   solidsGroup.push(ground);
 	
   while (dots.length <=  ground.width/200) {
@@ -63,6 +83,17 @@ function setup() {
     dotThing.x = dots.length * 200;
   }
 
+  let lvlOneLeftWall = new levelOne.Sprite();
+  lvlOneLeftWall.x = lvlOneGround.x - lvlOneGround.width/2;
+  lvlOneLeftWall.y = lvlOneGround.y;
+  lvlOneLeftWall.width = 50;
+  lvlOneLeftWall.height = lvlOneGround.height;
+
+  let lvlOneRightWall = new levelOne.Sprite();
+  lvlOneRightWall.x = lvlOneGround.x - lvlOneGround.width/2;
+  lvlOneRightWall.y = lvlOneGround.y;
+  lvlOneRightWall.width = 50;
+  lvlOneRightWall.height = lvlOneGround.height;
 }
 
 function draw() {
