@@ -28,13 +28,13 @@ function setup() {
   levelOne.color = "green";
   levelOne.collider = "static";
 
-  let lvlOneGround = new levelOne.Sprite();
-  lvlOneGround.color = "orange";
-  lvlOneGround.collider = "n";
-  lvlOneGround.x = 0;
-  lvlOneGround.y = 0;
-  lvlOneGround.width = 7000;
-  lvlOneGround.height = 2000;
+  let lvlOneBackground = new levelOne.Sprite();
+  lvlOneBackground.color = "orange";
+  lvlOneBackground.collider = "n";
+  lvlOneBackground.x = 0;
+  lvlOneBackground.y = 0;
+  lvlOneBackground.width = 7000;
+  lvlOneBackground.height = 2000;
 
   ground = new Sprite();
   ground.width = windowWidth*30;
@@ -83,17 +83,48 @@ function setup() {
     dotThing.x = dots.length * 200;
   }
 
+  let wallWidth = 50;
+
   let lvlOneLeftWall = new levelOne.Sprite();
-  lvlOneLeftWall.x = lvlOneGround.x - lvlOneGround.width/2;
-  lvlOneLeftWall.y = lvlOneGround.y;
-  lvlOneLeftWall.width = 50;
-  lvlOneLeftWall.height = lvlOneGround.height;
+  lvlOneLeftWall.x = lvlOneBackground.x - lvlOneBackground.width/2;
+  lvlOneLeftWall.y = lvlOneBackground.y;
+  lvlOneLeftWall.width = wallWidth;
+  lvlOneLeftWall.height = lvlOneBackground.height;
+  // lvlOneLeftWall.visible = false;
 
   let lvlOneRightWall = new levelOne.Sprite();
-  lvlOneRightWall.x = lvlOneGround.x - lvlOneGround.width/2;
-  lvlOneRightWall.y = lvlOneGround.y;
-  lvlOneRightWall.width = 50;
-  lvlOneRightWall.height = lvlOneGround.height;
+  lvlOneRightWall.x = lvlOneBackground.x + lvlOneBackground.width/2;
+  lvlOneRightWall.y = lvlOneBackground.y;
+  lvlOneRightWall.width = wallWidth;
+  lvlOneRightWall.height = lvlOneBackground.height;
+
+  let lvlOneFloorBottom = new levelOne.Sprite();
+  lvlOneFloorBottom.x = lvlOneBackground.x;
+  lvlOneFloorBottom.y = lvlOneBackground.y + lvlOneBackground.height/2;
+  lvlOneFloorBottom.width = lvlOneBackground.width + wallWidth;
+  lvlOneFloorBottom.height = wallWidth;
+  solidsGroup.push(lvlOneFloorBottom);
+
+  let lvlOneFloorFirstLeft = new levelOne.Sprite();
+  lvlOneFloorFirstLeft.x = lvlOneBackground.x - wallWidth*3;
+  lvlOneFloorFirstLeft.y = lvlOneFloorBottom.y - wallWidth*6;
+  lvlOneFloorFirstLeft.width = lvlOneBackground.width - wallWidth*6;
+  lvlOneFloorFirstLeft.height = wallWidth;
+  solidsGroup.push(lvlOneFloorFirstLeft);
+
+  let lvlOneFloorFirstRight = new levelOne.Sprite();
+  lvlOneFloorFirstRight.x = lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth;
+  lvlOneFloorFirstRight.y = lvlOneFloorBottom.y - wallWidth*6;
+  lvlOneFloorFirstRight.width = lvlOneBackground.width - lvlOneFloorFirstLeft.width - wallWidth*3;
+  lvlOneFloorFirstRight.height = wallWidth;
+  solidsGroup.push(lvlOneFloorFirstRight);
+
+  let lvlOneFloorSecond = new levelOne.Sprite();
+  lvlOneFloorSecond.x = lvlOneBackground.x;
+  lvlOneFloorSecond.y = lvlOneFloorFirstLeft.y - wallWidth*5;
+  lvlOneFloorSecond.width = lvlOneBackground.width + wallWidth;
+  lvlOneFloorSecond.height = wallWidth;
+  solidsGroup.push(lvlOneFloorSecond);
 }
 
 function draw() {
