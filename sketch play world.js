@@ -7,6 +7,7 @@
 
 let player, ground, dots, testOB, orgin;
 let levelOne;
+let cantPass;
 let solidsGroup = [];
 
 let playerMaxSpeed = 10;
@@ -18,11 +19,16 @@ let isOnGround = false;
 let cameraMovement = 50;
 
 function setup() {
-  new Canvas("1.8:1");
+  new Canvas("1.8 : 1");
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;  //  m/s^2
   camera.zoom = 0.1;
+
+  cantPass = new Sprite;
+  cantPass.collider = "static";
+  cantPass.colour = "black";
+  cantPass.y = 6481.615143750003;
 
   levelOne = new Group();
   levelOne.color = "green";
@@ -87,7 +93,7 @@ function setup() {
 
   let lvlOneLeftWall = new levelOne.Sprite();
   lvlOneLeftWall.x = lvlOneBackground.x - lvlOneBackground.width/2;
-  lvlOneLeftWall.y = lvlOneBackground.y;
+  lvlOneLeftWall.y = lvlOneBackground.y + 2000;
   lvlOneLeftWall.width = wallWidth;
   lvlOneLeftWall.height = lvlOneBackground.height;
   // lvlOneLeftWall.visible = false;
@@ -120,14 +126,19 @@ function setup() {
   solidsGroup.push(lvlOneFloorFirstRight);
 
   let lvlOneFloorSecond = new levelOne.Sprite();
-  lvlOneFloorSecond.x = lvlOneBackground.x;
+  lvlOneFloorSecond.x = lvlOneBackground.x + wallWidth*3;
   lvlOneFloorSecond.y = lvlOneFloorFirstLeft.y - wallWidth*5;
-  lvlOneFloorSecond.width = lvlOneBackground.width + wallWidth;
+  lvlOneFloorSecond.width = lvlOneBackground.width - wallWidth*5;
   lvlOneFloorSecond.height = wallWidth;
   solidsGroup.push(lvlOneFloorSecond);
 }
 
 function draw() {
+  if (levelOne.length < 6){
+    console.log(player.y);
+  }
+ 
+
   clear();
   managePlayerStates();
   detectPlayerImput();
