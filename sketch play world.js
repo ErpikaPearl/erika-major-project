@@ -23,12 +23,14 @@ function setup() {
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;  //  m/s^2
-  camera.zoom = 0.1;
+  // camera.zoom = 0.1;
 
-  cantPass = new Sprite;
+  cantPass = new Sprite();
   cantPass.collider = "static";
   cantPass.colour = "black";
-  cantPass.y = 6481.615143750003;
+  cantPass.y = 0;
+  cantPass.x = 1328.3333333333337;
+  cantPass.w = 100;
 
   levelOne = new Group();
   levelOne.color = "green";
@@ -135,7 +137,7 @@ function setup() {
 
 function draw() {
   if (levelOne.length < 6){
-    console.log(player.y);
+    console.log(player.x);
   }
  
 
