@@ -21,7 +21,7 @@ function setup() {
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;  //  m/s^2
-  world.setBounds(0, 0, 10000, 10000);
+  // world.setBounds(0, 0, 10000, 10000);
   camera.zoom = 0.09;
 
   player = new Sprite();

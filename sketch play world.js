@@ -5,55 +5,34 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let player, ground, dots, testOB, orgin;
-let levelOne;
+
+//  Declaring Variables
+
+//  Declaring sprites and groups
+let player, ground, dots, testOB, orgin, HUDFuel;
+let lvlOneBackground, levelOne;
 let cantPass;
 let solidsGroup = [];
-
+//  Declaring player variables
 let playerMaxSpeed = 10;
 let doubleJump = false;
 let dash = true;
 let lastSwitchedDash = 0;
 let isOnGround = false;
-
+//  Declaring world and camera variables
 let cameraMovement = 50;
+let wallWidth = 50;
 
 function setup() {
-  new Canvas("1.8 : 1");
+  //  Set up world
+  new Canvas(1278, 710);
   angleMode(DEGREES);
   rectMode(CENTER);
-  world.gravity.y = 9.8;  //  m/s^2
-  // camera.zoom = 0.1;
+  world.gravity.y = 9.8;
+  camera.zoom = 0.9;
+  camera.zoom = 0.1;
 
-  cantPass = new Sprite();
-  cantPass.collider = "static";
-  cantPass.colour = "black";
-  cantPass.y = 0;
-  cantPass.x = 1328.3333333333337;
-  cantPass.w = 100;
-
-  levelOne = new Group();
-  levelOne.color = "green";
-  levelOne.collider = "static";
-
-  let lvlOneBackground = new levelOne.Sprite();
-  lvlOneBackground.color = "orange";
-  lvlOneBackground.collider = "n";
-  lvlOneBackground.x = 0;
-  lvlOneBackground.y = 0;
-  lvlOneBackground.width = 7000;
-  lvlOneBackground.height = 2000;
-
-  ground = new Sprite();
-  ground.width = windowWidth*30;
-  ground.height = 500;
-  ground.y = windowHeight + windowHeight/8 + 600;
-  ground.x = 0;
-  ground.color = "black";
-  ground.collider = "static";
-  ground.friction = 4;
-  ground.bounciness = 0;
-
+  //  Set up player
   player = new Sprite();
   player.width = 50;
   player.height = 80;
@@ -62,6 +41,51 @@ function setup() {
   player.collider = "dynamic";
   player.rotationLock = true;
   player.bounciness = 0;
+
+  //  Set up HUD
+  HUDFuel = new Sprite();
+  HUDFuel.x = 50;
+  HUDFuel.y = 50;
+  HUDFuel.width = 60;
+  HUDFuel.height = 60;
+  HUDFuel.collider = "none";
+  HUDFuel.color = "white"; 
+
+  //  Set up Level one
+  //Note to Mr. Schellenberg: The levels are set up by making a sprite for each floor, wall, and platform.
+  //This is very inefficient but there is no easier way to do this using p5 Play. I could have used p5 Play's
+  //Tiles constructor, but this greatly limits what I would be able to do using the tiles. For example, I 
+  //Wouldn't have been able to have the player interact differently will walls and floors.
+  levelOne = new Group();
+  levelOne.color = "green";
+  levelOne.collider = "static";
+  levelOne.friction = 4;
+  levelOne.bounciness = 0;
+
+  lvlOneBackground = new levelOne.Sprite();
+  lvlOneBackground.color = "orange";
+  lvlOneBackground.collider = "n";
+  lvlOneBackground.x = 0;
+  lvlOneBackground.y = 0;
+  lvlOneBackground.width = 7000;
+  lvlOneBackground.height = 2000;
+  lvlOneBase = new levelOne.Sprite();
+  lvlOneBase.color = "green";
+  lvlOneBase.collider = "n";
+  lvlOneBase.x = 0;
+  lvlOneBase.y = lvlOneBackground.y + lvlOneBackground.height - 2;
+  lvlOneBase.width = lvlOneBackground.width + wallWidth;
+  lvlOneBase.height = 2000;
+
+  // ground = new Sprite();
+  // ground.width = windowWidth*30;
+  // ground.height = 500;
+  // ground.y = windowHeight + windowHeight/8 + 600;
+  // ground.x = 0;
+  // ground.color = "black";
+  // ground.collider = "static";
+  // ground.friction = 4;
+  // ground.bounciness = 0;
 
   // testOB= new Sprite();
   // testOB.width = 100;
@@ -77,25 +101,25 @@ function setup() {
   orgin.y = 0;
   orgin.collider = "static";
 
-  dots = new Group();
-  dots.color = "yellow";
-  dots.y = ground.y;
-  dots.diameter = 10;
-  dots.collider = "static";
+  // dots = new Group();
+  // dots.color = "yellow";
+  // dots.y = ground.y;
+  // dots.diameter = 10;
+  // dots.collider = "static";
 
   // solidsGroup.push(testOB);
-  solidsGroup.push(ground);
+  // solidsGroup.push(ground);
 	
-  while (dots.length <=  ground.width/200) {
-    let dotThing = new dots.Sprite();
-    dotThing.x = dots.length * 200;
-  }
+  // while (dots.length <=  ground.width/200) {
+  //   let dotThing = new dots.Sprite();
+  //   dotThing.x = dots.length * 200;
+  // }
 
-  let wallWidth = 50;
-
+  
+  //  Create walls and floors
   let lvlOneLeftWall = new levelOne.Sprite();
   lvlOneLeftWall.x = lvlOneBackground.x - lvlOneBackground.width/2;
-  lvlOneLeftWall.y = lvlOneBackground.y + 2000;
+  lvlOneLeftWall.y = lvlOneBackground.y;
   lvlOneLeftWall.width = wallWidth;
   lvlOneLeftWall.height = lvlOneBackground.height;
   // lvlOneLeftWall.visible = false;
@@ -119,10 +143,9 @@ function setup() {
   lvlOneFloorFirstLeft.width = lvlOneBackground.width - wallWidth*6;
   lvlOneFloorFirstLeft.height = wallWidth;
   solidsGroup.push(lvlOneFloorFirstLeft);
-
   let lvlOneFloorFirstRight = new levelOne.Sprite();
   lvlOneFloorFirstRight.x = lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth;
-  lvlOneFloorFirstRight.y = lvlOneFloorBottom.y - wallWidth*6;
+  lvlOneFloorFirstRight.y = lvlOneFloorFirstLeft.y;
   lvlOneFloorFirstRight.width = lvlOneBackground.width - lvlOneFloorFirstLeft.width - wallWidth*3;
   lvlOneFloorFirstRight.height = wallWidth;
   solidsGroup.push(lvlOneFloorFirstRight);
@@ -133,26 +156,65 @@ function setup() {
   lvlOneFloorSecond.width = lvlOneBackground.width - wallWidth*5;
   lvlOneFloorSecond.height = wallWidth;
   solidsGroup.push(lvlOneFloorSecond);
+
+  let lvlOneFloorThirdLeft = new levelOne.Sprite();
+  lvlOneFloorThirdLeft.x = lvlOneBackground.x - wallWidth*10;
+  lvlOneFloorThirdLeft.y = lvlOneFloorSecond.y - wallWidth*10;
+  lvlOneFloorThirdLeft.width = lvlOneBackground.width - wallWidth*20;
+  lvlOneFloorThirdLeft.height = wallWidth;
+  solidsGroup.push(lvlOneFloorThirdLeft);
+  let lvlOneFloorThirdRight = new levelOne.Sprite();
+  lvlOneFloorThirdRight.x = lvlOneBackground.x + wallWidth*64;
+  lvlOneFloorThirdRight.y = lvlOneFloorThirdLeft.y;
+  lvlOneFloorThirdRight.width = lvlOneBackground.width/8 - wallWidth*5;
+  lvlOneFloorThirdRight.height = wallWidth;
+  solidsGroup.push(lvlOneFloorThirdRight);
+
+  let lvlOneFloorFourthRight = new levelOne.Sprite();
+  lvlOneFloorFourthRight.x = -(lvlOneBackground.x - wallWidth*10);
+  lvlOneFloorFourthRight.y = lvlOneFloorThirdLeft.y - wallWidth*6;
+  lvlOneFloorFourthRight.width = lvlOneBackground.width - wallWidth*20;
+  lvlOneFloorFourthRight.height = wallWidth;
+  solidsGroup.push(lvlOneFloorFourthRight);
+  let lvlOneFloorFourthLeft = new levelOne.Sprite();
+  lvlOneFloorFourthLeft.x = -(lvlOneBackground.x + wallWidth*64);
+  lvlOneFloorFourthLeft.y = lvlOneFloorFourthRight.y;
+  lvlOneFloorFourthLeft.width = lvlOneBackground.width/8 - wallWidth*5;
+  lvlOneFloorFourthLeft.height = wallWidth;
+  solidsGroup.push(lvlOneFloorFourthLeft);
+
+  let lvlOneFloorFifthLeft = new levelOne.Sprite();
+  lvlOneFloorFifthLeft.x = lvlOneBackground.x - lvlOneBackground.width/4 - wallWidth*4;
+  lvlOneFloorFifthLeft.y = lvlOneBackground.y - lvlOneBackground.height/2;
+  lvlOneFloorFifthLeft.width = lvlOneBackground.width/2 - wallWidth*7;
+  lvlOneFloorFifthLeft.height = wallWidth;
+  solidsGroup.push(lvlOneFloorFifthLeft);
+  let lvlOneFloorFifthRight = new levelOne.Sprite();
+  lvlOneFloorFifthRight.x = -(lvlOneFloorFifthLeft.x);
+  lvlOneFloorFifthRight.y = lvlOneBackground.y - lvlOneBackground.height/2;
+  lvlOneFloorFifthRight.width = lvlOneFloorFifthLeft.width;
+  lvlOneFloorFifthRight.height = wallWidth;
+  solidsGroup.push(lvlOneFloorFifthRight);
+
+  //  Create platforms and secondary walls
 }
 
 function draw() {
-  if (levelOne.length < 6){
-    console.log(player.x);
-  }
- 
-
   clear();
+  camera.on();
+
   managePlayerStates();
   detectPlayerImput();
+
+  noStroke();
+  lvlOneBackground.draw();
+  levelOne.draw();
 
   camera.x = player.x;
   camera.y = player.y; 
 
   camera.off();
-  rect(50, 50, 60, 60);
-  rect(120, 50, 40, 40);
-  rect(170, 50, 40, 40);
-  rect(220, 50, 40, 40);
+  HUDFuel.draw();
 }
 
 function keyPressed(){
