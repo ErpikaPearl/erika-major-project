@@ -9,22 +9,23 @@
 //  Declaring Variables
 
 //  Declaring sprites, assets and groups
-let player, ground, dots, testOB, orgin, HUDFuel;
-let lvlOneBackground, levelOne;
-let cantPass;
+let player, orgin, HUDFuel;
+let lvlOneBackground, levelOne, levelOneCollectibles;
 let solidsGroup = [];
 let footStep0, footStep1, jump, jetPack0, wind;
 //  Declaring player variables
-let playerMaxSpeed = 10;
 let doubleJump = false;
 let dash = true;
 let lastSwitchedDash = 0;
 let lastSwitchedWalk = 0;
 let isOnGround = false;
+let playerWallet = [0, 0];
 //  Declaring world and camera variables
 let cameraMovement = 50;
 let wallWidth = 50;
 let level = "One";
+let totalCoins = 0;
+let totalBigCoins = 6;
 
 function preload(){
   footStep0 = loadSound("Assets/footstep00.ogg");
@@ -46,8 +47,9 @@ function setup() {
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;
+  allSprites.autoCull = false;  //  Prevents sprites from dissapearing when too far away from the camera
   camera.zoom = 0.9;
-  // camera.zoom = 0.1;
+  camera.zoom = 0.1;
 
   //  Set up player
   player = new Sprite();
@@ -58,6 +60,7 @@ function setup() {
   player.collider = "dynamic";
   player.rotationLock = true;
   player.bounciness = 0;
+  player.maxSpeed = 10;
 
   //  Set up HUD
   HUDFuel = new Sprite();
@@ -94,44 +97,11 @@ function setup() {
   lvlOneBase.width = lvlOneBackground.width + wallWidth;
   lvlOneBase.height = 2000;
 
-  // ground = new Sprite();
-  // ground.width = windowWidth*30;
-  // ground.height = 500;
-  // ground.y = windowHeight + windowHeight/8 + 600;
-  // ground.x = 0;
-  // ground.color = "black";
-  // ground.collider = "static";
-  // ground.friction = 4;
-  // ground.bounciness = 0;
-
-  // testOB= new Sprite();
-  // testOB.width = 100;
-  // testOB.height = 120;
-  // testOB.collider = "static";
-  // testOB.color = "black";
-  // testOB.x = width/2;
-  // testOB.y = height - height/5;
-
   orgin = new Sprite();
   orgin.diameter = 60;
   orgin.x = 0;
   orgin.y = 0;
   orgin.collider = "static";
-
-  // dots = new Group();
-  // dots.color = "yellow";
-  // dots.y = ground.y;
-  // dots.diameter = 10;
-  // dots.collider = "static";
-
-  // solidsGroup.push(testOB);
-  // solidsGroup.push(ground);
-	
-  // while (dots.length <=  ground.width/200) {
-  //   let dotThing = new dots.Sprite();
-  //   dotThing.x = dots.length * 200;
-  // }
-
   
   //  Create walls and floors
   let lvlOneLeftWall = new levelOne.Sprite();
@@ -360,17 +330,79 @@ function setup() {
   lvlOneWallFifth1.width = wallWidth;
   lvlOneWallFifth1.height = wallWidth*10;
 
-  player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
-  player.x = lvlOneBackground.width/2 - wallWidth*5;
+  //  Place player a the top of the level
+  // player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
+  // player.x = lvlOneBackground.width/2 - wallWidth*5;
+
+  levelOneCollectibles = new Group();
+  levelOneCollectibles.diameter = wallWidth*1.5;
+  levelOneCollectibles.collider = "none";
+  levelOneCollectibles.color = "pink";
+  levelOneCollectibles.special = true;
+
+  let bigCoin1 = new levelOneCollectibles.Sprite();
+  bigCoin1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5;
+  bigCoin1.x = -lvlOneBackground.width/2 + wallWidth*3;
+  let bigCoin2 = new levelOneCollectibles.Sprite();
+  bigCoin2.y = lvlOnePlaformFifthLeftmost.y - wallWidth*4;
+  bigCoin2.x = lvlOneBackground.x + wallWidth*24;
+  let bigCoin3 = new levelOneCollectibles.Sprite();
+  bigCoin3.y = lvlOneFloorThirdLeft.y - wallWidth*2;
+  bigCoin3.x = -lvlOneBackground.width/2 + wallWidth*2;
+  let bigCoin4 = new levelOneCollectibles.Sprite();
+  bigCoin4.y = lvlOneFloorSecond.y - wallWidth*6;
+  bigCoin4.x = lvlOneBackground.x - wallWidth*28;
+  let bigCoin5 = new levelOneCollectibles.Sprite();
+  bigCoin5.y = lvlOneFloorSecond.y - wallWidth*2;
+  bigCoin5.x = lvlOneBackground.width/2 - wallWidth*2;
+  let bigCoin6 = new levelOneCollectibles.Sprite();
+  bigCoin6.y = lvlOneFloorBottom.y - wallWidth*2;
+  bigCoin6.x = -lvlOneBackground.width/2 + wallWidth*2;
+
+  let floor0 = 6;
+  let floor1 = 4;
+  let floor2 = 6;
+  let floor3 = 4;
+  let floor4 = 6;
+  totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
+  for (let i = 0; i < totalCoins; i++){
+    let coin = new levelOneCollectibles.Sprite();
+    coin.color = "yellow";
+    coin.diameter = wallWidth;
+    if (floor0 > 0){
+      coin.y = lvlOneFloorBottom.y - wallWidth*2;
+      floor0 --;
+    }
+    else if (floor1 > 0){
+      coin.y = lvlOneFloorFirstLeft.y - wallWidth*2;
+      floor1 --;
+    }
+    else if (floor2 > 0){
+      coin.y = lvlOneFloorSecond.y - wallWidth*2;
+      floor2 --;
+    }
+    else if (floor3 > 0){
+      coin.y = lvlOneFloorThirdLeft.y - wallWidth*2;
+      floor3 --;
+    }
+    else if (floor4 > 0){
+      coin.y = lvlOneFloorFourthLeft.y - wallWidth*2;
+      floor4 --;
+    }
+    coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
+  }
 }
 
 function draw() {
   clear();
   camera.on();
 
+  //  Do all functions
   managePlayerStates();
   detectPlayerImput();
+  player.overlaps(levelOneCollectibles, collectItems);
 
+  //  Draw/render sprites
   noStroke();
   lvlOneBackground.draw();
   levelOne.draw();
@@ -435,7 +467,7 @@ function keyPressed(){
 function detectPlayerImput(){
   // console.log(isOnGround);
   //  Player Movements
-  if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -playerMaxSpeed){  //  A (LEFT)
+  if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -player.maxSpeed){  //  A (LEFT)
     player.bearing = 180;
     if (isOnGround){
       player.applyForceScaled(-50, 0);
@@ -445,7 +477,7 @@ function detectPlayerImput(){
       player.applyForceScaled(-5, 0);
     }
   }
-  else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= playerMaxSpeed){  // D (RIGHT)
+  else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= player.maxSpeed){  // D (RIGHT)
     player.bearing = 360;
     if (isOnGround){
       player.applyForceScaled(50, 0);
@@ -472,10 +504,6 @@ function managePlayerStates(){
       isOnGround = true;
     }
   }
-  // if (player.y >= 0){
-  //   wind.setVolume(1);
-  //   console.log("wind");
-  // }
 }
 
 function walkSound(){
@@ -490,11 +518,14 @@ function walkSound(){
   }
 }
 
-
-
-// function coolDown(waitTime, lastSwitched, ability){
-//   if (millis() > waitTime + lastSwitched){
-//     ability = !ability;
-//     lastSwitched = millis();
-//   }
-// }
+//  FIX ISSUE WHERE BOTH COINS ARE COLLECTED
+function collectItems(player, itemSpirte){
+  if (itemSpirte.color = "yellow"){
+    playerWallet[1] = playerWallet[1] + 1;
+  }
+  else {
+    playerWallet[0] = playerWallet[0] + 1;
+  }
+  itemSpirte.remove();
+  console.log(playerWallet)
+}

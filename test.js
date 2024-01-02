@@ -1,39 +1,27 @@
-let player, ui;
+let player, gems;
+let money = 0;
 
 function setup() {
-  new Canvas(500, 240);
-  player = new Sprite();
-  player.d = 80;
-  player.color = "magenta";
+	new Canvas(160, 456);
 
-  ui = new Group();
-  for (let i = 0; i < 9; i++) {
-    new ui.Sprite(100 + i * 40, 210, 35, 35, "n");
-  }
-  camera.zoom = 0.5;
+	gems = new Group();
+	gems.diameter = 10;
+	gems.x = () => random(0, canvas.w);
+	gems.y = () => random(0, canvas.h);
+	gems.amount = 80;
+
+	player = new Sprite();
+
+	player.overlaps(gems, collectThings);
+}
+
+function collectThings(player, gemThing) {
+	gemThing.remove();
+  money++;
+  console.log(money);
 }
 
 function draw() {
-  background(0);
-
-  camera.on();
-
-  for (let i = 0; i < 10; i++) {
-    fill(i * 20, 200, 200); // blue to gray
-    rect(-250 + i * 50, -250 + i * 100, 750, 50);
-  }
-  player.moveTowards(mouse, 0.01);
-  player.draw();
-  camera.x = player.x;
-  camera.y = player.y;
-
-  camera.off();
-
-  ui.color = "orange";
-  for (let i = 0; i < 9; i++) {
-    if (kb[i + 1]) {
-      ui[i].color = "red";
-    }
-  }
-  ui.draw();
+	clear();
+	player.moveTowards(mouse);
 }
