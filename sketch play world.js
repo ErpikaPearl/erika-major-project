@@ -10,16 +10,9 @@
 
 //  Declaring sprites, assets and groups
 let player, orgin, HUDFuel;
-let lvlOneBackground, levelOne, levelOneCollectibles;
+let lvlOneBackground, levelOne, levelOneCollectibles, lazers;
 let solidsGroup = [];
 let footStep0, footStep1, jump, jetPack0, wind;
-//  Declaring player variables
-let doubleJump = false;
-let dash = true;
-let lastSwitchedDash = 0;
-let lastSwitchedWalk = 0;
-let isOnGround = false;
-let playerWallet = [0, 0];
 //  Declaring world and camera variables
 let cameraMovement = 50;
 let wallWidth = 50;
@@ -27,6 +20,7 @@ let level = "One";
 let totalCoins = 0;
 let totalBigCoins = 6;
 
+//  Load in assets
 function preload(){
   footStep0 = loadSound("Assets/footstep00.ogg");
   footStep1 = loadSound("Assets/footstep01.ogg");
@@ -61,6 +55,11 @@ function setup() {
   player.rotationLock = true;
   player.bounciness = 0;
   player.maxSpeed = 10;
+  player.doubleJump = false;
+  player.dash = true;
+  player.lastSwitchedDash = 0;
+  player.isOnGround = false;
+  player.wallet = [0, 0];
 
   //  Set up HUD
   HUDFuel = new Sprite();
@@ -81,6 +80,7 @@ function setup() {
   levelOne.collider = "static";
   levelOne.friction = 4;
   levelOne.bounciness = 0;
+  levelOne.wallBounciness = 0.3;
 
   lvlOneBackground = new levelOne.Sprite();
   lvlOneBackground.color = "orange";
@@ -109,6 +109,7 @@ function setup() {
   lvlOneLeftWall.y = lvlOneBackground.y;
   lvlOneLeftWall.width = wallWidth;
   lvlOneLeftWall.height = lvlOneBackground.height;
+  lvlOneLeftWall.bounciness = levelOne.wallBounciness;
   // lvlOneLeftWall.visible = false;
 
   let lvlOneRightWall = new levelOne.Sprite();
@@ -116,6 +117,7 @@ function setup() {
   lvlOneRightWall.y = lvlOneBackground.y;
   lvlOneRightWall.width = wallWidth;
   lvlOneRightWall.height = lvlOneBackground.height;
+  lvlOneRightWall.bounciness = levelOne.wallBounciness;
 
   let lvlOneFloorBottom = new levelOne.Sprite();
   lvlOneFloorBottom.x = lvlOneBackground.x;
@@ -260,75 +262,89 @@ function setup() {
   lvlOneWallFirst0.y = (lvlOneFloorBottom.y + lvlOneFloorFirstLeft.y)/2 - wallWidth*1;
   lvlOneWallFirst0.width = wallWidth;
   lvlOneWallFirst0.height = wallWidth*3;
+  lvlOneWallFirst0.bounciness = levelOne.wallBounciness;
   let lvlOneWallFirst1 = new levelOne.Sprite();
   lvlOneWallFirst1.x = lvlOneWallFirst0.x + wallWidth*15;
   lvlOneWallFirst1.y = lvlOneWallFirst0.y;
   lvlOneWallFirst1.width = wallWidth;
   lvlOneWallFirst1.height = lvlOneWallFirst0.height;
+  lvlOneWallFirst1.bounciness = levelOne.wallBounciness;
   let lvlOneWallFirst2 = new levelOne.Sprite();
   lvlOneWallFirst2.x = lvlOneWallFirst0.x + wallWidth*55;
   lvlOneWallFirst2.y = lvlOneWallFirst0.y;
   lvlOneWallFirst2.width = wallWidth;
   lvlOneWallFirst2.height = lvlOneWallFirst0.height;
+  lvlOneWallFirst2.bounciness = levelOne.wallBounciness;
   let lvlOneWallFirst3 = new levelOne.Sprite();
   lvlOneWallFirst3.x = lvlOneBackground.x + wallWidth*45;
   lvlOneWallFirst3.y = lvlOneWallFirst0.y;
   lvlOneWallFirst3.width = wallWidth;
   lvlOneWallFirst3.height = lvlOneWallFirst0.height;
+  lvlOneWallFirst3.bounciness = levelOne.wallBounciness;
 
   let lvlOneWallSecond0 = new levelOne.Sprite();
   lvlOneWallSecond0.x = lvlOneBackground.x - wallWidth*40;
   lvlOneWallSecond0.y = (lvlOneFloorFirstLeft.y + lvlOneFloorSecond.y)/2 - wallWidth*1;
   lvlOneWallSecond0.width = wallWidth;
   lvlOneWallSecond0.height = wallWidth*2;
+  lvlOneWallSecond0.bounciness = levelOne.wallBounciness;
   let lvlOneWallSecond1 = new levelOne.Sprite();
   lvlOneWallSecond1.x =  lvlOneWallSecond0.x + wallWidth*30;
   lvlOneWallSecond1.y = lvlOneWallSecond0.y;
   lvlOneWallSecond1.width = wallWidth;
   lvlOneWallSecond1.height = wallWidth*2;
+  lvlOneWallSecond1.bounciness = levelOne.wallBounciness;
   let lvlOneWallSecond2 = new levelOne.Sprite();
   lvlOneWallSecond2.x =  lvlOneWallSecond0.x + wallWidth*70;
   lvlOneWallSecond2.y = lvlOneWallSecond0.y;
   lvlOneWallSecond2.width = wallWidth;
   lvlOneWallSecond2.height = wallWidth*2;
+  lvlOneWallSecond2.bounciness = levelOne.wallBounciness;
 
   let lvlOneWallThird0 = new levelOne.Sprite();
   lvlOneWallThird0.x = lvlOneBackground.x - wallWidth*25;
   lvlOneWallThird0.y = (lvlOneFloorSecond.y + lvlOneFloorThirdLeft.y)/2 - wallWidth*2;
   lvlOneWallThird0.width = wallWidth;
   lvlOneWallThird0.height = wallWidth*5;
+  lvlOneWallThird0.bounciness = levelOne.wallBounciness;
   let lvlOneWallThird1 = new levelOne.Sprite();
   lvlOneWallThird1.x = lvlOneBackground.x + wallWidth*58;
   lvlOneWallThird1.y = lvlOneWallThird0.y;
   lvlOneWallThird1.width = wallWidth;
   lvlOneWallThird1.height = wallWidth*7;
+  lvlOneWallThird1.bounciness = levelOne.wallBounciness;
 
   let lvlOneWallFourth0 = new levelOne.Sprite();
   lvlOneWallFourth0.x = lvlOneBackground.x - wallWidth*58;
   lvlOneWallFourth0.y = (lvlOneFloorThirdLeft.y + lvlOneFloorFourthLeft.y)/2 - wallWidth*2;
   lvlOneWallFourth0.width = wallWidth;
   lvlOneWallFourth0.height = wallWidth*3;
+  lvlOneWallFourth0.bounciness = levelOne.wallBounciness;
   let lvlOneWallFourth1 = new levelOne.Sprite();
   lvlOneWallFourth1.x = lvlOneBackground.x - wallWidth*20;
   lvlOneWallFourth1.y = (lvlOneFloorThirdLeft.y + lvlOneFloorFourthLeft.y)/2 - wallWidth*1;
   lvlOneWallFourth1.width = wallWidth;
   lvlOneWallFourth1.height =lvlOneWallFourth0.height;
+  lvlOneWallFourth1.bounciness = levelOne.wallBounciness;
   let lvlOneWallFourth2 = new levelOne.Sprite();
   lvlOneWallFourth2.x = lvlOneBackground.x + wallWidth*20;
   lvlOneWallFourth2.y = (lvlOneFloorThirdLeft.y + lvlOneFloorFourthLeft.y)/2 - wallWidth*1;
   lvlOneWallFourth2.width = wallWidth;
   lvlOneWallFourth2.height = lvlOneWallFourth0.height;
+  lvlOneWallFourth2.bounciness = levelOne.wallBounciness;
 
   let lvlOneWallFifth0 = new levelOne.Sprite();
   lvlOneWallFifth0.x = lvlOneBackground.x - wallWidth*63;
   lvlOneWallFifth0.y = (lvlOneFloorFourthLeft.y + lvlOneFloorFifthLeft.y)/2 - wallWidth*1;
   lvlOneWallFifth0.width = wallWidth;
   lvlOneWallFifth0.height = wallWidth*10;
+  lvlOneWallFifth0.bounciness = levelOne.wallBounciness;
   let lvlOneWallFifth1 = new levelOne.Sprite();
   lvlOneWallFifth1.x = lvlOneBackground.x + wallWidth*22;
   lvlOneWallFifth1.y = lvlOneWallFifth0.y; 
   lvlOneWallFifth1.width = wallWidth;
   lvlOneWallFifth1.height = wallWidth*10;
+  lvlOneWallFifth1.bounciness = levelOne.wallBounciness;
 
   //  Place player a the top of the level
   // player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
@@ -391,6 +407,64 @@ function setup() {
     }
     coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
   }
+
+  //  Create hostiles
+  lazers = new Group();
+  lazers.y = windowHeight/2;
+  lazers.x = windowWidth/2;
+  lazers.thickness  = 20;
+  lazers.collider = "static";
+  lazers.color = "blue";
+
+  let lazerEntrance = new lazers.Sprite();
+  lazerEntrance.x = lvlOneBackground.x;
+  lazerEntrance.y = -lvlOneBackground.height/2;
+  lazerEntrance.height = lazers.thickness;
+  lazerEntrance.width = wallWidth*15;
+  lazerEntrance.interval = 1600;
+  lazerEntrance.lastSwitched = 0;
+  lazerEntrance.isSolid = true;
+
+  let lazerBottom = new lazers.Sprite();
+  lazerBottom.x = wallWidth*17;
+  lazerBottom.y = lvlOneFloorBottom.y - wallWidth*3;
+  lazerBottom.height = wallWidth*5;
+  lazerBottom.width = lazers.thickness*15;
+  lazerBottom.interval = 1600;
+  lazerBottom.lastSwitched = 0;
+  lazerBottom.isSolid = true;
+
+  for (let i = 5; i>0; i--){  //  Top right room, top floor
+    let lazer1 = new lazers.Sprite();
+    lazer1.x = wallWidth*68 - i*wallWidth*8;
+    lazer1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5.5;
+    lazer1.height = wallWidth*7;
+    lazer1.width = lazers.thickness;
+    lazer1.interval = 2000;
+    lazer1.lastSwitched = i*600;
+    lazer1.isSolid = true;
+  }
+  for (let i = 0; i<5; i++){  //  Top right room, bottom floor
+    let lazer2 = new lazers.Sprite();
+    lazer2.x = wallWidth*28 + i*wallWidth*8;
+    lazer2.y = lvlOnePlaformFifthLeftmost.y + wallWidth*1;
+    lazer2.height = wallWidth*5;
+    lazer2.width = lazers.thickness;
+    lazer2.interval = 2000;
+    lazer2.lastSwitched = i*600;
+    lazer2.isSolid = true;
+  }
+  for (let i = 5; i>0; i--){  //  bottom room
+    let lazer3 = new lazers.Sprite();
+    lazer3.x = -wallWidth*2 - i*wallWidth*8;
+    lazer3.y = lvlOneFloorBottom.y - wallWidth*3;
+    lazer3.height = wallWidth*5;
+    lazer3.width = lazers.thickness;
+    lazer3.interval = 1600;
+    lazer3.lastSwitched = i*600;
+    lazer3.isSolid = true;
+  }
+
 }
 
 function draw() {
@@ -401,6 +475,9 @@ function draw() {
   managePlayerStates();
   detectPlayerImput();
   player.overlaps(levelOneCollectibles, collectItems);
+  for (let lazer of lazers){
+    lazerFlash(lazer);
+  }
 
   //  Draw/render sprites
   noStroke();
@@ -423,21 +500,21 @@ function mousePressed(){
 function keyPressed(){
   //  Player Movements
   if (keyCode === 32){  //  (SPACE) Jump
-    if (isOnGround){
+    if (player.isOnGround){
       jump.play();
       player.applyForceScaled(0, -400);      
     }
-    else if (doubleJump && !isOnGround){
+    else if (player.doubleJump && !player.isOnGround){
       jetPack0.play();
       player.applyForceScaled(0, -300);
-      doubleJump = false;
+      player.doubleJump = false;
     }
   }
   
-  if (keyCode === 16 && dash){  //  (SHIFT) Dash in the direction player is facing
+  if (keyCode === 16 && player.dash){  //  (SHIFT) Dash in the direction player is facing
     let waitTime = 1000;
     
-    if (millis() > waitTime + lastSwitchedDash){
+    if (millis() > waitTime + player.lastSwitchedDash){
       jetPack0.play();
       if (player.bearing === 360){
         player.applyForceScaled(800, 0);
@@ -445,7 +522,7 @@ function keyPressed(){
       else if (player.bearing === 180){
         player.applyForceScaled(-800, 0);
       }
-      lastSwitchedDash = millis();
+      player.lastSwitchedDash = millis();
     }
   }
 
@@ -465,11 +542,11 @@ function keyPressed(){
 }
 
 function detectPlayerImput(){
-  // console.log(isOnGround);
+  // console.log(player.isOnGround);
   //  Player Movements
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -player.maxSpeed){  //  A (LEFT)
     player.bearing = 180;
-    if (isOnGround){
+    if (player.isOnGround){
       player.applyForceScaled(-50, 0);
       walkSound();
     }
@@ -479,7 +556,7 @@ function detectPlayerImput(){
   }
   else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= player.maxSpeed){  // D (RIGHT)
     player.bearing = 360;
-    if (isOnGround){
+    if (player.isOnGround){
       player.applyForceScaled(50, 0);
       walkSound();
     }
@@ -488,20 +565,25 @@ function detectPlayerImput(){
     }
   }
   //  Slows down player when they stop walking
-  else if(player.vel.x > 0 && player.bearing === 360 && isOnGround){
+  else if(player.vel.x > 0 && player.bearing === 360 && player.isOnGround){
     player.vel.x --;
   }
-  else if(player.vel.x < 0 && player.bearing === 180 && isOnGround){
+  else if(player.vel.x < 0 && player.bearing === 180 && player.isOnGround){
     player.vel.x ++;
   }
 }
 
 function managePlayerStates(){
-  isOnGround = false;
+  player.isOnGround = false;
   for (let i = 0; i < solidsGroup.length; i++){
     if (player.colliding(solidsGroup[i])){  //  If touching any solid object
-      doubleJump = true;
-      isOnGround = true;
+      player.doubleJump = true;
+      player.isOnGround = true;
+    }
+  }
+  for (let lazer of lazers){
+    if (player.colliding(lazer)){  //  If touching any lazer
+      player.remove();  //  Add in death Screen later
     }
   }
 }
@@ -521,11 +603,25 @@ function walkSound(){
 //  FIX ISSUE WHERE BOTH COINS ARE COLLECTED
 function collectItems(player, itemSpirte){
   if (itemSpirte.color = "yellow"){
-    playerWallet[1] = playerWallet[1] + 1;
+    player.wallet[1] = player.wallet[1] + 1;
   }
   else {
-    playerWallet[0] = playerWallet[0] + 1;
+    player.wallet[0] = player.wallet[0] + 1;
   }
   itemSpirte.remove();
-  console.log(playerWallet)
+  console.log(player.wallet)
+}
+
+function lazerFlash(lazerThing){
+	if (millis() > lazerThing.interval + lazerThing.lastSwitched){
+		lazerThing.visible = !lazerThing.visible;
+		lazerThing.isSolid = ! lazerThing.isSolid;
+		if (lazerThing.isSolid){
+			lazerThing.collider = "static";
+		}
+		else{
+			lazerThing.collider = "none";
+		}
+		lazerThing.lastSwitched = millis();
+	}
 }
