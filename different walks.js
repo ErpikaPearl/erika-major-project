@@ -43,7 +43,7 @@ function setup() {
   world.gravity.y = 9.8;
   allSprites.autoCull = false;  //  Prevents sprites from dissapearing when too far away from the camera
   camera.zoom = 0.9;
-  camera.zoom = 0.1;
+  // camera.zoom = 0.1;
 
   //  Set up player
   player = new Sprite();
@@ -369,7 +369,6 @@ function setup() {
 
   //  Place player a the top of the level
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
-  player.x = lvlOneBackground.width/2 - wallWidth*5;
 
   levelOneCollectibles = new Group();
   levelOneCollectibles.diameter = wallWidth*1.5;
@@ -576,15 +575,16 @@ function mousePressed(){
 }
 
 function keyPressed(){
+  let jumpSpeed = -10;
   //  Player Movements
   if (keyCode === 32){  //  (SPACE) Jump
     if (player.isOnGround){
       jump.play();
-      player.applyForceScaled(0, -400);      
+      player.vel.y = jumpSpeed;
     }
     else if (player.doubleJump && !player.isOnGround){
       jetPack0.play();
-      player.applyForceScaled(0, -300);
+      player.vel.y = jumpSpeed;
       player.doubleJump = false;
     }
   }
@@ -620,35 +620,35 @@ function keyPressed(){
 }
 
 function detectPlayerImput(){
-  // console.log(player.isOnGround);
+  let playerSpeed = 7;
   //  Player Movements
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -player.maxSpeed){  //  A (LEFT)
     player.bearing = 180;
     if (player.isOnGround){
-      player.applyForceScaled(-50, 0);
+      player.vel.x = -playerSpeed;
       walkSound();
     }
     else{
-      player.applyForceScaled(-5, 0);
+      player.vel.x = -playerSpeed/10;
     }
   }
   else if ((keyIsDown(68) || keyIsDown(RIGHT_ARROW)) && player.vel.x <= player.maxSpeed){  // D (RIGHT)
     player.bearing = 360;
     if (player.isOnGround){
-      player.applyForceScaled(50, 0);
+      player.vel.x = playerSpeed;
       walkSound();
     }
     else{
-      player.applyForceScaled(5, 0);
+      player.vel.x = playerSpeed/10;
     }
   }
   //  Slows down player when they stop walking
-  else if(player.vel.x > 0 && player.bearing === 360 && player.isOnGround){
-    player.vel.x --;
-  }
-  else if(player.vel.x < 0 && player.bearing === 180 && player.isOnGround){
-    player.vel.x ++;
-  }
+  // else if(player.vel.x > 0 && player.bearing === 360 && player.isOnGround){
+  //   player.vel.x --;
+  // }
+  // else if(player.vel.x < 0 && player.bearing === 180 && player.isOnGround){
+  //   player.vel.x ++;
+  // }
 }
 
 function managePlayerStates(){
