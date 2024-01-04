@@ -9,7 +9,7 @@
 //  Declaring Variables
 
 //  Declaring sprites, assets and groups
-let player, orgin, HUDFuel;
+let player, orgin, HUD, coinCount, heart;
 let lvlOneBackground, levelOne, levelOneCollectibles, lazers;
 let solidsGroup = [];
 let footStep0, footStep1, jump, jetPack0, wind;
@@ -54,6 +54,8 @@ function setup() {
   player.collider = "dynamic";
   player.rotationLock = true;
   player.bounciness = 0;
+  player.hp = 5;
+  player.hpHolder = [];
   player.maxSpeed = 10;
   player.doubleJump = false;
   player.dash = true;
@@ -62,13 +64,32 @@ function setup() {
   player.wallet = [0, 0];
 
   //  Set up HUD
-  HUDFuel = new Sprite();
-  HUDFuel.x = 50;
-  HUDFuel.y = 50;
-  HUDFuel.width = 60;
-  HUDFuel.height = 60;
-  HUDFuel.collider = "none";
-  HUDFuel.color = "white"; 
+  HUD = new Group();
+  HUD.collider = "none";
+  HUD.color = "white"; 
+  HUD.y = 50;
+
+  coinCount = new HUD.Sprite();
+  coinCount.x = 50;
+  coinCount.width = 60;
+  coinCount.height = 60;
+  coinCount.text = player.wallet[1];
+  coinCount.textSize = 40;
+
+  timerCount = new HUD.Sprite();
+  timerCount.width = 100;
+  timerCount.height = 60;
+  timerCount.x = canvas.w - 30 - timerCount.width;
+  timerCount.textSize = 40;
+
+  for (let hp = 0; hp < player.hp; hp++){
+    let heart = new HUD.Sprite();
+    heart.radius = 20;
+    heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
+    heart.color = "red"
+    player.hpHolder.push(heart);
+  }
+
 
   //  Set up Level one
   //Note to Mr. Schellenberg: The levels are set up by making a sprite for each floor, wall, and platform.
@@ -369,7 +390,7 @@ function setup() {
   bigCoin4.y = lvlOneFloorSecond.y - wallWidth*6;
   bigCoin4.x = lvlOneBackground.x - wallWidth*28;
   let bigCoin5 = new levelOneCollectibles.Sprite();
-  bigCoin5.y = lvlOneFloorSecond.y - wallWidth*2;
+  bigCoin5.y = lvlOneFloorSecond.y - wallWidth*6;
   bigCoin5.x = lvlOneBackground.width/2 - wallWidth*2;
   let bigCoin6 = new levelOneCollectibles.Sprite();
   bigCoin6.y = lvlOneFloorBottom.y - wallWidth*2;
@@ -415,6 +436,8 @@ function setup() {
   lazers.thickness  = 20;
   lazers.collider = "static";
   lazers.color = "blue";
+  lazers.isSolid = true;
+
 
   let lazerEntrance = new lazers.Sprite();
   lazerEntrance.x = lvlOneBackground.x;
@@ -423,16 +446,30 @@ function setup() {
   lazerEntrance.width = wallWidth*15;
   lazerEntrance.interval = 1600;
   lazerEntrance.lastSwitched = 0;
-  lazerEntrance.isSolid = true;
 
   let lazerBottom = new lazers.Sprite();
-  lazerBottom.x = wallWidth*17;
+  lazerBottom.x = -wallWidth*52.5;
   lazerBottom.y = lvlOneFloorBottom.y - wallWidth*3;
   lazerBottom.height = wallWidth*5;
-  lazerBottom.width = lazers.thickness*15;
+  lazerBottom.width = lazers.thickness*35;
   lazerBottom.interval = 1600;
   lazerBottom.lastSwitched = 0;
-  lazerBottom.isSolid = true;
+
+  let lazerMiddle = new lazers.Sprite();
+  lazerMiddle.x = lvlOneBackground.x;
+  lazerMiddle.y = lvlOneFloorSecond.y - wallWidth*4;
+  lazerMiddle.height = lazers.thickness;
+  lazerMiddle.width = lvlOneBackground.width - wallWidth;
+  lazerMiddle.interval = 2600;
+  lazerMiddle.lastSwitched = 0;
+
+  let lazerTopLeftRoom = new lazers.Sprite();
+  lazerTopLeftRoom.x = -wallWidth*68;
+  lazerTopLeftRoom.y = lvlOnePlaformFifthRightmost0.y + wallWidth*2;
+  lazerTopLeftRoom.height = lazers.thickness;
+  lazerTopLeftRoom.width = wallWidth*3;
+  lazerTopLeftRoom.interval = 1600;
+  lazerTopLeftRoom.lastSwitched = 0;
 
   for (let i = 5; i>0; i--){  //  Top right room, top floor
     let lazer1 = new lazers.Sprite();
@@ -442,7 +479,6 @@ function setup() {
     lazer1.width = lazers.thickness;
     lazer1.interval = 2000;
     lazer1.lastSwitched = i*600;
-    lazer1.isSolid = true;
   }
   for (let i = 0; i<5; i++){  //  Top right room, bottom floor
     let lazer2 = new lazers.Sprite();
@@ -452,7 +488,6 @@ function setup() {
     lazer2.width = lazers.thickness;
     lazer2.interval = 2000;
     lazer2.lastSwitched = i*600;
-    lazer2.isSolid = true;
   }
   for (let i = 5; i>0; i--){  //  bottom room
     let lazer3 = new lazers.Sprite();
@@ -462,9 +497,51 @@ function setup() {
     lazer3.width = lazers.thickness;
     lazer3.interval = 1600;
     lazer3.lastSwitched = i*600;
-    lazer3.isSolid = true;
   }
-
+  for (let i = 5; i>0; i--){  //  Main room, top floor
+    let lazer4 = new lazers.Sprite();
+    lazer4.x = -wallWidth*7 - i*wallWidth*8;
+    lazer4.y = lvlOnePlaformFifthLeftmost.y - wallWidth*2.5;
+    lazer4.height = wallWidth*12;
+    lazer4.width = lazers.thickness;
+    lazer4.interval = 900;
+    lazer4.lastSwitched = i*300;
+  }
+  for (let i = 8; i>0; i--){  //  Main room, fourth floor
+    let lazer5 = new lazers.Sprite();
+    lazer5.x = wallWidth*28 - i*wallWidth*8;
+    lazer5.y = lvlOneFloorThirdLeft.y - wallWidth*3;
+    lazer5.height = wallWidth*6;
+    lazer5.width = lazers.thickness;
+    lazer5.interval = 900;
+    lazer5.lastSwitched = i*300;
+    if (i === 1 || i === 6){
+      lazer5.y = lvlOneFloorThirdLeft.y - wallWidth*1;
+      lazer5.height = wallWidth*3;
+    }
+  }
+  for (let i = 10; i>0; i--){  //  Main room, second floor
+    let lazer6 = new lazers.Sprite();
+    lazer6.x = wallWidth*20 - i*wallWidth*6;
+    lazer6.y = lvlOneFloorFirstLeft.y - wallWidth*2.5;
+    lazer6.height = wallWidth*4;
+    lazer6.width = lazers.thickness;
+    lazer6.interval = 1600;
+    lazer6.lastSwitched = i*600;
+    if (i === 5 || i === 10){
+      lazer6.y = lazer6.y + wallWidth;
+      lazer6.height = wallWidth*2;
+    }
+  }
+  for (let i = 2; i>0; i--){  //  Top right room, top floor
+    let lazer7 = new lazers.Sprite();
+    lazer7.x = -wallWidth*50 - i*wallWidth*4;
+    lazer7.y = lvlOneFloorThirdLeft.y - wallWidth*2;
+    lazer7.height = wallWidth*3;
+    lazer7.width = lazers.thickness;
+    lazer7.interval = 600;
+    lazer7.lastSwitched = i*600;
+  }
 }
 
 function draw() {
@@ -478,6 +555,7 @@ function draw() {
   for (let lazer of lazers){
     lazerFlash(lazer);
   }
+  timerCount.text = floor(millis()/1000);
 
   //  Draw/render sprites
   noStroke();
@@ -488,7 +566,7 @@ function draw() {
   camera.y = player.y; 
 
   camera.off();
-  HUDFuel.draw();
+  HUD.draw();
 }
 
 function mousePressed(){
@@ -576,15 +654,20 @@ function detectPlayerImput(){
 function managePlayerStates(){
   player.isOnGround = false;
   for (let i = 0; i < solidsGroup.length; i++){
-    if (player.colliding(solidsGroup[i])){  //  If touching any solid object
+    if (player.colliding(solidsGroup[i])){  //  If touching any ground object
       player.doubleJump = true;
       player.isOnGround = true;
     }
   }
   for (let lazer of lazers){
     if (player.colliding(lazer)){  //  If touching any lazer
-      player.remove();  //  Add in death Screen later
+      player.hp--;
+      player.hpHolder[player.hp].remove();
     }
+  }
+  if (player.hp === 0 || floor(millis()/1000) > 120){
+    console.log(floor(millis()/1000));
+    console.log("dead");
   }
 }
 
@@ -618,10 +701,15 @@ function lazerFlash(lazerThing){
 		lazerThing.isSolid = ! lazerThing.isSolid;
 		if (lazerThing.isSolid){
 			lazerThing.collider = "static";
+      // lazerThing.color = "blue";
+
 		}
 		else{
 			lazerThing.collider = "none";
+      // lazerThing.color = "lightblue";
+
 		}
+    coinCount.text = player.wallet[1];
 		lazerThing.lastSwitched = millis();
 	}
 }
