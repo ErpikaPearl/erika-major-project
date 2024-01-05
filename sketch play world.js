@@ -43,7 +43,7 @@ function setup() {
   world.gravity.y = 9.8;
   allSprites.autoCull = false;  //  Prevents sprites from dissapearing when too far away from the camera
   camera.zoom = 0.9;
-  camera.zoom = 0.1;
+  // camera.zoom = 0.1;
 
   //  Set up player
   player = new Sprite();

@@ -54,6 +54,7 @@ function setup() {
   player.collider = "dynamic";
   player.rotationLock = true;
   player.bounciness = 0;
+  player.friction = 1;
   player.hp = 5;
   player.hpHolder = [];
   player.maxSpeed = 10;
@@ -99,7 +100,7 @@ function setup() {
   levelOne = new Group();
   levelOne.color = "green";
   levelOne.collider = "static";
-  levelOne.friction = 4;
+  levelOne.friction = 400;
   levelOne.bounciness = 0;
   levelOne.wallBounciness = 0.3;
 
