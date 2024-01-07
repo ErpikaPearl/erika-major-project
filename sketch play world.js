@@ -556,6 +556,7 @@ function draw() {
     lazerFlash(lazer);
   }
   timerCount.text = floor(millis()/1000);
+  coinCount.text = player.wallet[1];
 
   //  Draw/render sprites
   noStroke();
@@ -695,21 +696,21 @@ function collectItems(player, itemSpirte){
   console.log(player.wallet)
 }
 
+//  make lazers under player and change to overlapping
 function lazerFlash(lazerThing){
 	if (millis() > lazerThing.interval + lazerThing.lastSwitched){
-		lazerThing.visible = !lazerThing.visible;
+		// lazerThing.visible = !lazerThing.visible;
 		lazerThing.isSolid = ! lazerThing.isSolid;
 		if (lazerThing.isSolid){
 			lazerThing.collider = "static";
-      // lazerThing.color = "blue";
+      lazerThing.color = "blue";
 
 		}
 		else{
 			lazerThing.collider = "none";
-      // lazerThing.color = "lightblue";
+      lazerThing.color = "lightblue";
 
 		}
-    coinCount.text = player.wallet[1];
 		lazerThing.lastSwitched = millis();
 	}
 }

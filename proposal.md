@@ -15,9 +15,9 @@ A 2d platformer video game that uses semi-realistic physics. The player should b
 - At least one enemy
 - Physics that are created by me
 - good visuals (images instead of shapes)
-- (Below was added after I sarted project)
+- •(Below was added after I sarted project)•
 - Collectibles
 - Start menu
-- eviornmental danger (spikes, lazers, etc)
-- game timer
-- HUD 
+- eviornmental danger (spikes, lazers, etc) 
+- game timer ✓
+- HUD ✓
