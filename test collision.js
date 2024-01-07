@@ -15,14 +15,14 @@ function setup() {
  objectOne = new Sprite();
  objectOne.mass = 50;
  objectOne.x = canvas.w/4;
- objectOne.y = canvas.h/2;
+ objectOne.y = canvas.h/2 + 110;
  objectOne.color = "red";
  objectOne.collider = "d";
 
  objectTwo = new Sprite();
  objectTwo.mass = 80;
  objectTwo.x = canvas.w - canvas.w/4;
- objectTwo.y = canvas.h/2;
+ objectTwo.y = canvas.h/2 + 110;
  objectTwo.color = "blue";
  objectTwo.collider = "d";
 }
@@ -30,8 +30,8 @@ function setup() {
 function draw() {
   clear();
   if (theyCollide === 0){
-    objectOne.applyForceScaled(20*increase, -30*increase);
-    objectTwo.applyForceScaled(-100*increase, -30*increase);
+    objectOne.applyForceScaled(40*increase, 30*increase);
+    objectTwo.applyForceScaled(-20*increase, 30*increase);
     theyCollide = 1;
   }
  else if(theyCollide === 1){

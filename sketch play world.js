@@ -100,7 +100,7 @@ function setup() {
   levelOne.color = "green";
   levelOne.collider = "static";
   levelOne.friction = 4;
-  levelOne.bounciness = 0;
+  levelOne.bounciness = .05;
   levelOne.wallBounciness = 0.3;
 
   lvlOneBackground = new levelOne.Sprite();
@@ -562,6 +562,7 @@ function draw() {
   noStroke();
   lvlOneBackground.draw();
   levelOne.draw();
+  lazers.draw();
 
   camera.x = player.x;
   camera.y = player.y; 
