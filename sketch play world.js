@@ -9,8 +9,8 @@
 //  Declaring Variables
 
 //  Declaring sprites, assets and groups
-let player, orgin, HUD, coinCount, heart;
-let lvlOneBackground, levelOne, levelOneCollectibles, lazers;
+let player, orgin, HUD, coinCount, timerCount, heart;
+let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
 let solidsGroup = [];
 let footStep0, footStep1, jump, jetPack0, wind;
 //  Declaring world and camera variables
@@ -86,7 +86,7 @@ function setup() {
     let heart = new HUD.Sprite();
     heart.radius = 20;
     heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
-    heart.color = "red"
+    heart.color = "red";
     player.hpHolder.push(heart);
   }
 
@@ -100,10 +100,10 @@ function setup() {
   levelOne.color = "green";
   levelOne.collider = "static";
   levelOne.friction = 4;
-  levelOne.bounciness = .05;
+  levelOne.bounciness = 0.05;
   levelOne.wallBounciness = 0.3;
 
-  lvlOneBackground = new levelOne.Sprite();
+  lvlOneBackground = new Sprite();
   lvlOneBackground.color = "orange";
   lvlOneBackground.collider = "n";
   lvlOneBackground.x = 0;
@@ -200,7 +200,7 @@ function setup() {
   lvlOneFloorFifthLeft.height = wallWidth;
   solidsGroup.push(lvlOneFloorFifthLeft);
   let lvlOneFloorFifthRight = new levelOne.Sprite();
-  lvlOneFloorFifthRight.x = -(lvlOneFloorFifthLeft.x);
+  lvlOneFloorFifthRight.x = -lvlOneFloorFifthLeft.x;
   lvlOneFloorFifthRight.y = lvlOneBackground.y - lvlOneBackground.height/2;
   lvlOneFloorFifthRight.width = lvlOneFloorFifthLeft.width;
   lvlOneFloorFifthRight.height = wallWidth;
@@ -253,7 +253,7 @@ function setup() {
   lvlOnePlaformFifthLeft.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthLeft);
   let lvlOnePlaformFifthRight = new levelOne.Sprite();
-  lvlOnePlaformFifthRight.x = -(lvlOnePlaformFifthLeft.x);
+  lvlOnePlaformFifthRight.x = -lvlOnePlaformFifthLeft.x;
   lvlOnePlaformFifthRight.y = lvlOneFloorFourthRight.y - wallWidth*5;
   lvlOnePlaformFifthRight.width = wallWidth*5;
   lvlOnePlaformFifthRight.height = wallWidth;
@@ -438,7 +438,6 @@ function setup() {
   lazers.color = "blue";
   lazers.isSolid = true;
 
-
   let lazerEntrance = new lazers.Sprite();
   lazerEntrance.x = lvlOneBackground.x;
   lazerEntrance.y = -lvlOneBackground.height/2;
@@ -556,17 +555,19 @@ function draw() {
     lazerFlash(lazer);
   }
   timerCount.text = floor(millis()/1000);
-  coinCount.text = player.wallet[1];
+  coinCount.text = player.wallet[0];
 
   //  Draw/render sprites
   noStroke();
   lvlOneBackground.draw();
-  levelOne.draw();
   lazers.draw();
+  levelOne.draw();
 
+  //  Move camera to follow player
   camera.x = player.x;
   camera.y = player.y; 
 
+  //  Draw HUD
   camera.off();
   HUD.draw();
 }
@@ -665,12 +666,17 @@ function managePlayerStates(){
     if (player.colliding(lazer)){  //  If touching any lazer
       player.hp--;
       player.hpHolder[player.hp].remove();
+      deathCoolDown();
     }
   }
   if (player.hp === 0 || floor(millis()/1000) > 120){
     console.log(floor(millis()/1000));
     console.log("dead");
   }
+}
+
+function deathCoolDown(){
+  console.log("HEHE");
 }
 
 function walkSound(){
@@ -687,31 +693,31 @@ function walkSound(){
 
 //  FIX ISSUE WHERE BOTH COINS ARE COLLECTED
 function collectItems(player, itemSpirte){
-  if (itemSpirte.color = "yellow"){
+  if (itemSpirte.color === "yellow"){
     player.wallet[1] = player.wallet[1] + 1;
   }
   else {
     player.wallet[0] = player.wallet[0] + 1;
   }
   itemSpirte.remove();
-  console.log(player.wallet)
+  console.log(player.wallet);
 }
 
 //  make lazers under player and change to overlapping
 function lazerFlash(lazerThing){
-	if (millis() > lazerThing.interval + lazerThing.lastSwitched){
-		// lazerThing.visible = !lazerThing.visible;
-		lazerThing.isSolid = ! lazerThing.isSolid;
-		if (lazerThing.isSolid){
-			lazerThing.collider = "static";
+  if (millis() > lazerThing.interval + lazerThing.lastSwitched){
+    // lazerThing.visible = !lazerThing.visible;
+    lazerThing.isSolid = ! lazerThing.isSolid;
+    if (lazerThing.isSolid){
+      lazerThing.collider = "static";
       lazerThing.color = "blue";
 
-		}
-		else{
-			lazerThing.collider = "none";
+    }
+    else{
+      lazerThing.collider = "none";
       lazerThing.color = "lightblue";
 
-		}
-		lazerThing.lastSwitched = millis();
-	}
+    }
+    lazerThing.lastSwitched = millis();
+  }
 }
