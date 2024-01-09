@@ -9,11 +9,12 @@
 //  Declaring Variables
 
 //  Declaring sprites, assets and groups
-let player, orgin, HUD, coinCount, timerCount, heart;
+let player, orgin, HUD, coinCount, timerCount, BigCoinCount, heart;
 let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
 let solidsGroup = [];
 let footStep0, footStep1, jump, jetPack0, wind;
 //  Declaring world and camera variables
+let currenthp;
 let cameraMovement = 50;
 let wallWidth = 50;
 let level = "One";
@@ -56,6 +57,7 @@ function setup() {
   player.bounciness = 0;
   player.hp = 5;
   player.hpHolder = [];
+  player.invulnerable = false;
   player.maxSpeed = 10;
   player.doubleJump = false;
   player.dash = true;
@@ -69,8 +71,16 @@ function setup() {
   HUD.color = "white"; 
   HUD.y = 50;
 
+  BigCoinCount = new HUD.Sprite();
+  BigCoinCount.x = 50;
+  BigCoinCount.width = 60;
+  BigCoinCount.height = 60;
+  BigCoinCount.text = player.wallet[0];
+  BigCoinCount.textSize = 40;
+  BigCoinCount.color = "pink";
+
   coinCount = new HUD.Sprite();
-  coinCount.x = 50;
+  coinCount.x = BigCoinCount.x + BigCoinCount.width/2 + 50;
   coinCount.width = 60;
   coinCount.height = 60;
   coinCount.text = player.wallet[1];
@@ -406,6 +416,7 @@ function setup() {
     let coin = new levelOneCollectibles.Sprite();
     coin.color = "yellow";
     coin.diameter = wallWidth;
+    coin.special = false;
     if (floor0 > 0){
       coin.y = lvlOneFloorBottom.y - wallWidth*2;
       floor0 --;
@@ -554,7 +565,12 @@ function draw() {
   for (let lazer of lazers){
     lazerFlash(lazer);
   }
+  if (player.hp < currenthp){
+    deathCoolDown(millis());
+  }
+  currenthp = player.hp;
   timerCount.text = floor(millis()/1000);
+  BigCoinCount.text = player.wallet[1];
   coinCount.text = player.wallet[0];
 
   //  Draw/render sprites
@@ -606,20 +622,6 @@ function keyPressed(){
       player.lastSwitchedDash = millis();
     }
   }
-
-  // //  Camera Movements
-  // else if (keyCode === 87 || keyCode === 38){  // W (UP)
-  //   let timeInitial = millis();
-  //   let waitTime = 1000;
-  //   if ((keyIsDown(87) || keyIsDown(UP_ARROW)) && player.vel === 0){  // W (UP)
-  //     console.log(camera.x);
-  //     if (timeInitial < waitTime + millis()){
-  //       for (let x = camera.x; x <= camera.x + cameraMovement; x++) {
-  //         camera.x ++;
-  //       }
-  //     }
-  //   }
-  // }
 }
 
 function detectPlayerImput(){
@@ -663,10 +665,10 @@ function managePlayerStates(){
     }
   }
   for (let lazer of lazers){
-    if (player.colliding(lazer)){  //  If touching any lazer
+    if (player.colliding(lazer) && player.invulnerable === false){  //  If touching any lazer and the player can take damage
       player.hp--;
       player.hpHolder[player.hp].remove();
-      deathCoolDown();
+
     }
   }
   if (player.hp === 0 || floor(millis()/1000) > 120){
@@ -675,8 +677,12 @@ function managePlayerStates(){
   }
 }
 
-function deathCoolDown(){
-  console.log("HEHE");
+function deathCoolDown(lastSwitched){
+  let waitTime = 1000;
+  player.invulnerable = true;
+  if (millis() > waitTime + lastSwitched){
+    player.invulnerable = false;
+  }
 }
 
 function walkSound(){
@@ -693,7 +699,7 @@ function walkSound(){
 
 //  FIX ISSUE WHERE BOTH COINS ARE COLLECTED
 function collectItems(player, itemSpirte){
-  if (itemSpirte.color === "yellow"){
+  if (itemSpirte.special === true){
     player.wallet[1] = player.wallet[1] + 1;
   }
   else {
