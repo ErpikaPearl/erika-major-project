@@ -57,6 +57,8 @@ function setup() {
   player.bounciness = 0;
   player.hp = 5;
   player.hpHolder = [];
+  player.lastHurt = 0;
+  player.gotHurt = false;
   player.invulnerable = false;
   player.maxSpeed = 10;
   player.doubleJump = false;
@@ -565,10 +567,8 @@ function draw() {
   for (let lazer of lazers){
     lazerFlash(lazer);
   }
-  if (player.hp < currenthp){
-    deathCoolDown(millis());
-  }
-  currenthp = player.hp;
+  deathCoolDown(millis());
+  console.log(player.gotHurt, player.invulnerable);
   timerCount.text = floor(millis()/1000);
   BigCoinCount.text = player.wallet[1];
   coinCount.text = player.wallet[0];
@@ -625,7 +625,6 @@ function keyPressed(){
 }
 
 function detectPlayerImput(){
-  // console.log(player.isOnGround);
   //  Player Movements
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -player.maxSpeed){  //  A (LEFT)
     player.bearing = 180;
@@ -668,20 +667,25 @@ function managePlayerStates(){
     if (player.colliding(lazer) && player.invulnerable === false){  //  If touching any lazer and the player can take damage
       player.hp--;
       player.hpHolder[player.hp].remove();
-
+      player.lastHurt = millis();
+      player.gotHurt = true;
     }
   }
-  if (player.hp === 0 || floor(millis()/1000) > 120){
+  if (player.hp === 0 || floor(millis()/1000) > 180){
     console.log(floor(millis()/1000));
     console.log("dead");
   }
 }
 
-function deathCoolDown(lastSwitched){
+function deathCoolDown(){
+  player.invulnerable = false;
   let waitTime = 1000;
-  player.invulnerable = true;
-  if (millis() > waitTime + lastSwitched){
-    player.invulnerable = false;
+  if (player.gotHurt){
+    player.invulnerable = true;
+    if (millis() > waitTime + player.lastHurt){
+      player.invulnerable = false;
+      player.gotHurt = false;
+    }
   }
 }
 
