@@ -678,13 +678,14 @@ function managePlayerStates(){
 }
 
 function deathCoolDown(){
-  player.invulnerable = false;
   let waitTime = 1000;
   if (player.gotHurt){
     player.invulnerable = true;
+    player.color = "pink";
     if (millis() > waitTime + player.lastHurt){
       player.invulnerable = false;
       player.gotHurt = false;
+      player.color = "red";
     }
   }
 }
@@ -693,10 +694,10 @@ function walkSound(){
   let played = 0;
   if (played === 0 && !footStep0.isPlaying()){
     footStep0.play();
-    played ++;
+    played = 1;
     if (played === 1 && !footStep1.isPlaying()){
       footStep1.play();
-      played ++;
+      played = 2;
     }
   }
 }
