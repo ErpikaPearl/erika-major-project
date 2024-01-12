@@ -14,7 +14,7 @@ let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
 let solidsGroup = [];
 let footStep0, footStep1, jump, jetPack0, wind;
 //  Declaring world and camera variables
-let currenthp;
+let levelState = "levelOne";
 let cameraMovement = 50;
 let wallWidth = 50;
 let level = "One";
@@ -568,16 +568,30 @@ function draw() {
     lazerFlash(lazer);
   }
   deathCoolDown(millis());
-  console.log(player.gotHurt, player.invulnerable);
+
+  //  Update text
   timerCount.text = floor(millis()/1000);
   BigCoinCount.text = player.wallet[1];
   coinCount.text = player.wallet[0];
 
   //  Draw/render sprites
-  noStroke();
-  lvlOneBackground.draw();
-  lazers.draw();
-  levelOne.draw();
+  if (levelState === "levelOne"){
+    noStroke();
+    lvlOneBackground.draw();
+    lazers.draw();
+    levelOne.draw();
+    levelOne.visible = true;
+    lazers.visible = true;
+    lvlOneBackground.visible = true;
+    player.visible = true;
+  }
+  else{
+    console.log("pain");
+    levelOne.visible = false;
+    lazers.visible = false;
+    lvlOneBackground.visible = false;
+    player.visible = false;
+  }
 
   //  Move camera to follow player
   camera.x = player.x;

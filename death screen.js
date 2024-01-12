@@ -1,10 +1,10 @@
 
 let endScreenHolder, buttons, restart, godMode, infoText;
 let wallWidth = 50;
-let wallet = [30, 0]
+let wallet = [30, 0];
 
 function setup() {
-	new Canvas(1278, 710);
+  new Canvas(1278, 710);
   angleMode(DEGREES);
   rectMode(CENTER);
 
@@ -28,7 +28,7 @@ function setup() {
   let youDied = new deathText.Sprite(deathText.x, deathText.y, 0, 0);
   // deathText.colour = "white";
   youDied.textSize = 60;
-  youDied.text = `  YOU DIED.`
+  youDied.text = "  YOU DIED.";
   youDied.textColor = "darkred";
 
   let stats = new deathText.Sprite(deathText.x, deathText.y, 0, 0);
@@ -43,10 +43,10 @@ function setup() {
 
   buttons = new endScreenHolder.Group();
   buttons.width = wallWidth*5;
-  buttons.height = wallWidth*3
+  buttons.height = wallWidth*3;
   buttons.y = canvas.h - canvas.h/4;
   buttons.color = "darkred";
-  buttons.collider = "static"
+  buttons.collider = "static";
   buttons.textSize = 30;
 
   restart = new buttons.Sprite();
@@ -67,17 +67,17 @@ function setup() {
 }
 
 function draw() {
-	clear();
+  clear();
 
   if (restart.mouse.hovering() || godMode.mouse.hovering()){
     if (restart.mouse.hovering()){
-      infoText.text = `Resart the game from the beginning.`
+      infoText.text = "Resart the game from the beginning.";
       restart.color = "red";
     }
     else{
       infoText.text = `Resart the game from the beginning but 
       in god mode. While in god mode, you 
-      can't die.`
+      can't die.`;
       godMode.color = "red";
     }
     infoText.visible = true;

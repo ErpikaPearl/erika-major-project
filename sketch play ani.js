@@ -67,7 +67,7 @@ function setup() {
   player.isOnGround = false;
   player.wallet = [0, 0];
   player.addAni("run", runAni, 8)
-  player.anis.scale = .15;
+  player.anis.scale = 0.15;
   player.anis.frameDelay = 5;
 
 
