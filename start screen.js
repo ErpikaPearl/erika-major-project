@@ -18,17 +18,17 @@ function setup() {
   backgroundBox.y = canvas.h/2;
   backgroundBox.color = "grey";
 
-  let deathText = new startScreenHolder.Group();
-  deathText.width = 0;
-  deathText.height = 0;
-  deathText.x = canvas.w/2;
-  deathText.y = canvas.h/4;
+  let StartText = new startScreenHolder.Group();
+  StartText.width = 0;
+  StartText.height = 0;
+  StartText.x = canvas.w/2;
+  StartText.y = canvas.h/4;
 
-  let youDied = new deathText.Sprite(deathText.x, deathText.y, 0, 0);
-  // deathText.colour = "white";
-  youDied.textSize = 60;
-  youDied.text = "  THE GAME.";
-  youDied.textColor = "darkred";
+  let theGame = new StartText.Sprite(StartText.x, StartText.y - wallWidth, 0, 0);
+  // StartText.colour = "white";
+  theGame.textSize = 60;
+  theGame.text = "  THE GAME.";
+  theGame.textColor = "darkred";
 
   buttons = new startScreenHolder.Group();
   buttons.width = wallWidth*5;
@@ -55,6 +55,8 @@ function setup() {
   rules.width = wallWidth*8;
   rules.text = "RULES";
   rules.state = "rules";
+  rules.lastSwitched = 0;
+  rules.waitTime = 200;
 
   let floatText = new startScreenHolder.Group();
   floatText.width = wallWidth*5;
@@ -69,6 +71,14 @@ function setup() {
   rulesInfo.height = wallWidth*3.5;
   rulesInfo.width = rules.width;
   rulesInfo.y = rules.y + rules.height/2 + rulesInfo.height/2;
+  rulesInfo.textSize = 13;
+  rulesInfo.text = `The point of this game is to collect all of the special (pink) coins 
+  in the level and then get back to the top within the time frame. 
+  The small coins give you extra points but are not necessary to 
+  complete the level. 
+
+  Controll the character using WASD or arrow keys. Use space to 
+  jump and shift to dash.`
 }
 
 function draw() {
@@ -84,6 +94,7 @@ function detectMouseImputs(){
       infoText.text = "Begin the game.";
       begin.color = "red";
       infoText.visible = true;
+      detectMouseClick(begin)
     }
     else if (godMode.mouse.hovering()){
       infoText.text = `Begin the game but 
@@ -91,9 +102,11 @@ function detectMouseImputs(){
       can't die.`;
       godMode.color = "red";
       infoText.visible = true;
+      detectMouseClick(godMode)
     }
-    else {
+    else if (millis() > rules.lastSwitched + rules.waitTime){
       rules.color = "Red";
+      detectMouseClick(rules)
     }
     infoText.x = mouse.x + infoText.width/2;
     infoText.y = mouse.y - infoText.height/2;
@@ -105,8 +118,15 @@ function detectMouseImputs(){
 }
 
 function detectMouseClick(buttonThing){
+
   if (buttonThing.mouse.pressing()){
-    console.log(buttonThing.state);
+    if (buttonThing === rules){
+      rulesInfo.visible = !rulesInfo.visible;
+      rules.lastSwitched = millis();
+    }
+    else{
+      console.log(buttonThing.state);
+    }
   }
 }
 

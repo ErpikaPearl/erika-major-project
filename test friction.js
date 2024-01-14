@@ -2,7 +2,7 @@ let player, base, theHeight, theTop;
 let wallWidth = 50;
 
 function setup() {
-  new Canvas(1000, 1000);
+  new Canvas(windowWidth, windowHeight);
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;
@@ -20,27 +20,18 @@ function setup() {
   // base.color = "grey";
 
   theTop = new Sprite();
-  theTop.width = 500;
+  theTop.width = windowWidth/2;
   theTop.height = 50;
   theTop.color = "brown";
   theTop.collider = "kinematic ";
   theTop.rotation = 0;
   theTop.text = theTop.rotation + "°";
   theTop.bearing = 360 
-  theTop.friction = 4;
-
-
-  theHeight = new Sprite();
-  theHeight.width = theTop.width;
-  theHeight.height = 5;
-  theHeight.x = theTop.x;
-  theHeight.y = theTop.y + theTop.height/2;
-  theHeight.color = "grey";
-  theHeight.collider = "s"
+  theTop.friction = 0;
 
   //  Set up player
   player = new Sprite();
-  player.x = theTop.x - theTop.width/2 + 100;
+  player.x = theTop.x - theTop.width/2  - 100;
   player.y = theTop.y - theTop.height/2 - 50;
   player.width = 80;
   player.height = 40;
@@ -57,17 +48,16 @@ function setup() {
   player.isOnGround = false;
   player.wallet = [0, 0];
   player.text = player.mass;
-  player.friction = 3/4;
+  player.friction = 0;
 }
 
 function draw() {
   clear();
+  console.log(player.vel.x, player.vel.y)
 }
 
 function keyPressed(){
   if (keyCode === 32){
-    theTop.rotation += 1;
-    theTop.text = theTop.rotation + "°";
-    theHeight.y += 1;
+    player.applyForceScaled(400, 0);
   }
 }

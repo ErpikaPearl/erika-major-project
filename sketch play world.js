@@ -12,14 +12,16 @@
 let player, orgin, HUD, coinCount, timerCount, BigCoinCount, heart;
 let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
 let solidsGroup = [];
+let screenHolder, startButtons, begin, godModeStart, rules, titleText, infoText, rulesInfo, deathInfo;
 let footStep0, footStep1, jump, jetPack0, wind;
 //  Declaring world and camera variables
-let levelState = "levelOne";
+let levelState = "startScreen";
 let cameraMovement = 50;
 let wallWidth = 50;
 let level = "One";
 let totalCoins = 0;
 let totalBigCoins = 6;
+let timeLimit = 120;
 
 //  Load in assets
 function preload(){
@@ -53,12 +55,14 @@ function setup() {
   player.mass = 70;
   player.color = "red";
   player.collider = "dynamic";
+  player.visible = false;
   player.rotationLock = true;
   player.bounciness = 0;
   player.hp = 5;
   player.hpHolder = [];
   player.lastHurt = 0;
   player.gotHurt = false;
+  player.timeLasted = 0;
   player.invulnerable = false;
   player.maxSpeed = 10;
   player.doubleJump = false;
@@ -72,6 +76,7 @@ function setup() {
   HUD.collider = "none";
   HUD.color = "white"; 
   HUD.y = 50;
+  HUD.visible = false;
 
   BigCoinCount = new HUD.Sprite();
   BigCoinCount.x = 50;
@@ -110,10 +115,12 @@ function setup() {
   //Wouldn't have been able to have the player interact differently will walls and floors.
   levelOne = new Group();
   levelOne.color = "green";
+  levelOne.stroke = levelOne.color;
   levelOne.collider = "static";
   levelOne.friction = 4;
   levelOne.bounciness = 0.05;
   levelOne.wallBounciness = 0.3;
+  levelOne.visible = false;
 
   lvlOneBackground = new Sprite();
   lvlOneBackground.color = "orange";
@@ -122,6 +129,8 @@ function setup() {
   lvlOneBackground.y = 0;
   lvlOneBackground.width = 7000;
   lvlOneBackground.height = 2000;
+  lvlOneBackground.visible = false;
+
   lvlOneBase = new levelOne.Sprite();
   lvlOneBase.color = "green";
   lvlOneBase.collider = "n";
@@ -130,11 +139,11 @@ function setup() {
   lvlOneBase.width = lvlOneBackground.width + wallWidth;
   lvlOneBase.height = 2000;
 
-  orgin = new Sprite();
-  orgin.diameter = 60;
-  orgin.x = 0;
-  orgin.y = 0;
-  orgin.collider = "static";
+  // orgin = new Sprite();
+  // orgin.diameter = 60;
+  // orgin.x = 0;
+  // orgin.y = 0;
+  // orgin.collider = "static";
   
   //  Create walls and floors
   let lvlOneLeftWall = new levelOne.Sprite();
@@ -388,6 +397,7 @@ function setup() {
   levelOneCollectibles.collider = "none";
   levelOneCollectibles.color = "pink";
   levelOneCollectibles.special = true;
+  levelOneCollectibles.visible = false;
 
   let bigCoin1 = new levelOneCollectibles.Sprite();
   bigCoin1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5;
@@ -450,6 +460,7 @@ function setup() {
   lazers.collider = "static";
   lazers.color = "blue";
   lazers.isSolid = true;
+  lazers.visible = false;
 
   let lazerEntrance = new lazers.Sprite();
   lazerEntrance.x = lvlOneBackground.x;
@@ -554,52 +565,194 @@ function setup() {
     lazer7.interval = 600;
     lazer7.lastSwitched = i*600;
   }
+
+  //  Create the start screen 
+  screenHolder = new Group();
+  screenHolder.collider = "none";
+  screenHolder.stroke = 1;
+  screenHolder.visible = true;
+
+  let backgroundBox = new screenHolder.Sprite();
+  backgroundBox.width = canvas.w;
+  backgroundBox.height = canvas.h;
+  backgroundBox.x = canvas.w/2;
+  backgroundBox.y = canvas.h/2;
+  backgroundBox.color = "grey";
+
+  titleText = new screenHolder.Sprite();
+  titleText.width = 0;
+  titleText.height = 0;
+  titleText.x = canvas.w/2;
+  titleText.y = canvas.h/5;
+  titleText.textSize = 60;
+  titleText.text = "  THE GAME.";
+  titleText.textColor = "darkred";
+
+  buttons = new screenHolder.Group();
+  buttons.width = wallWidth*5;
+  buttons.height = wallWidth*3;
+  buttons.y = canvas.h - canvas.h/4;
+  buttons.color = "darkred";
+  buttons.collider = "static";
+  buttons.textSize = 30;
+
+  begin = new buttons.Sprite();
+  begin.x = canvas.w/3;
+  begin.text = "BEGIN";
+  begin.state = "levelOne"
+
+  godMode = new buttons.Sprite();
+  godMode.x = canvas.w - canvas.w/3;
+  godMode.text = "GOD MODE";
+  godMode.state = "godMode"
+
+  rules = new buttons.Sprite();
+  rules.x = canvas.w/2;
+  rules.y = canvas.h/3;
+  rules.height = wallWidth;
+  rules.width = wallWidth*8;
+  rules.text = "RULES";
+  rules.state = "rules";
+  rules.lastSwitched = 0;
+  rules.waitTime = 200;
+
+  let floatText = new screenHolder.Group();
+  floatText.width = wallWidth*5;
+  floatText.height = wallWidth;
+  floatText.visible = false;
+  floatText.color = "white";
+
+  infoText = new floatText.Sprite();
+
+  rulesInfo = new floatText.Group();
+  rulesInfo.textSize = 13;
+
+  healthInfo = new rulesInfo.Sprite();
+  healthInfo.x = wallWidth*6.5;
+  healthInfo.y = wallWidth*2.5;
+  healthInfo.width = 0;
+  healthInfo.height = 0;
+  healthInfo.text = `  ↑
+  This shows you your current health.
+  When it reaches zero you die`;
+
+  coinsInfo = new rulesInfo.Sprite();
+  coinsInfo.x = wallWidth*2.8;
+  coinsInfo.y = wallWidth*3.7;
+  coinsInfo.width = 0;
+  coinsInfo.height = 0;
+  coinsInfo.text = `  ↑
+  |
+  |
+  |
+  This shows you your coins. The 
+  pink coins are the amount of
+  special coins you have, and 
+  the white coins are the amount 
+  of normal coins you have`;
+
+  timeInfo = new rulesInfo.Sprite();
+  timeInfo.x = wallWidth*21.9;
+  timeInfo.y = wallWidth*2.8;
+  timeInfo.width = 0;
+  timeInfo.height = 0;
+  timeInfo.text = `  ↑
+  This shows the current time.
+  When it reaches the time limit,
+  ` + timeLimit + ` seconds, you die.`;
+
+  mainRules = new rulesInfo.Sprite();
+  mainRules.x = canvas.w/2;
+  mainRules.height = wallWidth*3.5;
+  mainRules.width = rules.width;
+  mainRules.y = rules.y + rules.height/2 + mainRules.height/2;
+  // mainRules.textSize = 13;
+  mainRules.text = `The point of this game is to collect all of the special (pink) coins 
+  in the level and then get back to the top within the time frame. 
+  The small coins give you extra points but are not necessary to 
+  complete the level. 
+
+  Controll the character using WASD or arrow keys. Use space to 
+  jump and shift to dash.`;
 }
 
 function draw() {
   clear();
-  camera.on();
 
-  //  Do all functions
-  managePlayerStates();
-  detectPlayerImput();
-  player.overlaps(levelOneCollectibles, collectItems);
-  for (let lazer of lazers){
-    lazerFlash(lazer);
+  //  Draw start screen
+  if (levelState === "startScreen"){
+    screenHolder.draw();
+    detectMouseImputs();
   }
-  deathCoolDown(millis());
 
-  //  Update text
-  timerCount.text = floor(millis()/1000);
-  BigCoinCount.text = player.wallet[1];
-  coinCount.text = player.wallet[0];
-
-  //  Draw/render sprites
-  if (levelState === "levelOne"){
-    noStroke();
-    lvlOneBackground.draw();
-    lazers.draw();
-    levelOne.draw();
+  //  Draw level one
+  else if (levelState === "levelOne" || levelState === "godMode"){
+    //  Make level visible
     levelOne.visible = true;
     lazers.visible = true;
     lvlOneBackground.visible = true;
     player.visible = true;
-  }
-  else{
-    console.log("pain");
+    HUD.visible = true;
+
+    screenHolder.visible = false;
+
+    //  Update text
+    timerCount.text = floor(millis()/1000);
+    BigCoinCount.text = player.wallet[1];
+    coinCount.text = player.wallet[0];
+
+    camera.on();
+    lvlOneBackground.draw();
+    lazers.draw();
+    levelOne.draw();
+
+    //  Do all functions
+    managePlayerStates();
+    detectPlayerImput();
+    player.overlaps(levelOneCollectibles, collectItems);
+    for (let lazer of lazers){
+      lazerFlash(lazer);
+    }
+    //  Only let the player take damage if in normal mode 
+    if (levelState === "levelOne"){
+      deathCoolDown(millis());
+    }
+    else {
+      player.invulnerable = true;
+    }
+  
+    //  Move camera to follow player
+    camera.x = player.x;
+    camera.y = player.y; 
+
+    //  Draw HUD
+    camera.off();
+    HUD.draw();
+  } 
+
+  //  Draw start screen
+  else if (levelState === "deathScreen"){
     levelOne.visible = false;
     lazers.visible = false;
     lvlOneBackground.visible = false;
     player.visible = false;
+    HUD.visible = false;
+    screenHolder.visible = true;
+
+    titleText.text = " YOU DIED."
+    rules.text = "VIEW STATS"
+    rulesInfo.text = "";
+    mainRules.textSize = 20;
+    mainRules.text = `Overall, you:
+
+    lasted ` + player.timeLasted + ` seconds
+    collected ` + player.wallet[1] + ` special coins
+    collected ` + player.wallet[0] + ` normal coins`
+
+    screenHolder.draw();
+    detectMouseImputs();
   }
-
-  //  Move camera to follow player
-  camera.x = player.x;
-  camera.y = player.y; 
-
-  //  Draw HUD
-  camera.off();
-  HUD.draw();
+  
 }
 
 function mousePressed(){
@@ -685,9 +838,10 @@ function managePlayerStates(){
       player.gotHurt = true;
     }
   }
-  if (player.hp === 0 || floor(millis()/1000) > 180){
-    console.log(floor(millis()/1000));
-    console.log("dead");
+  if (player.hp === 0 || floor(millis()/1000) > timeLimit){
+    levelState = "deathScreen";
+    console.log(levelState);
+    player.timeLasted = floor(millis());
   }
 }
 
@@ -716,7 +870,6 @@ function walkSound(){
   }
 }
 
-//  FIX ISSUE WHERE BOTH COINS ARE COLLECTED
 function collectItems(player, itemSpirte){
   if (itemSpirte.special === true){
     player.wallet[1] = player.wallet[1] + 1;
@@ -744,5 +897,50 @@ function lazerFlash(lazerThing){
 
     }
     lazerThing.lastSwitched = millis();
+  }
+}
+
+function detectMouseImputs(){
+  if (begin.mouse.hovering() || godMode.mouse.hovering() || rules.mouse.hovering()){
+    if (begin.mouse.hovering()){
+      infoText.text = "Begin the game.";
+      begin.color = "red";
+      infoText.visible = true;
+      detectMouseClick(begin)
+    }
+    else if (godMode.mouse.hovering()){
+      infoText.text = `Begin the game but 
+      in god mode. While in god mode, you 
+      can't die.`;
+      godMode.color = "red";
+      infoText.visible = true;
+      detectMouseClick(godMode)
+    }
+    else if (millis() > rules.lastSwitched + rules.waitTime){
+      rules.color = "Red";
+      detectMouseClick(rules)
+    }
+    infoText.x = mouse.x + infoText.width/2;
+    infoText.y = mouse.y - infoText.height/2;
+  }
+  else{
+    infoText.visible = false;
+    buttons.color = "darkred";
+  }
+}
+
+function detectMouseClick(buttonThing){
+
+  if (buttonThing.mouse.pressing()){
+    if (buttonThing === rules){
+      rulesInfo.visible = !rulesInfo.visible;
+      if (levelState === "startScreen"){
+        HUD.visible = !HUD.visible;
+      }
+      rules.lastSwitched = millis();
+    }
+    else{
+      levelState = buttonThing.state;
+    }
   }
 }
