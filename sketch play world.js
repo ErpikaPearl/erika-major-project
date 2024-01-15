@@ -12,7 +12,7 @@
 let player, orgin, HUD, coinCount, timerCount, BigCoinCount, heart;
 let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
 let solidsGroup = [];
-let screenHolder, startButtons, begin, godModeStart, rules, titleText, infoText, rulesInfo, deathInfo;
+let screenHolder, startButtons, begin, godModeStart, rules, titleText, infoText, floatText, rulesInfo, deathInfo;
 let footStep0, footStep1, jump, jetPack0, wind;
 //  Declaring world and camera variables
 let levelState = "startScreen";
@@ -22,6 +22,7 @@ let level = "One";
 let totalCoins = 0;
 let totalBigCoins = 6;
 let timeLimit = 120;
+let gameStart = 0;
 
 //  Load in assets
 function preload(){
@@ -388,7 +389,7 @@ function setup() {
   lvlOneWallFifth1.height = wallWidth*10;
   lvlOneWallFifth1.bounciness = levelOne.wallBounciness;
 
-  //  Place player a the top of the level
+  //  Place player at the top of the level
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
   player.x = lvlOneBackground.width/2 - wallWidth*5;
 
@@ -616,7 +617,7 @@ function setup() {
   rules.lastSwitched = 0;
   rules.waitTime = 200;
 
-  let floatText = new screenHolder.Group();
+  floatText = new screenHolder.Group();
   floatText.width = wallWidth*5;
   floatText.height = wallWidth;
   floatText.visible = false;
@@ -693,11 +694,12 @@ function draw() {
     lvlOneBackground.visible = true;
     player.visible = true;
     HUD.visible = true;
+    levelOneCollectibles.visible = true;
 
     screenHolder.visible = false;
 
     //  Update text
-    timerCount.text = floor(millis()/1000);
+    timerCount.text = floor(millis()/1000 - gameStart);
     BigCoinCount.text = player.wallet[1];
     coinCount.text = player.wallet[0];
 
@@ -730,14 +732,15 @@ function draw() {
     HUD.draw();
   } 
 
-  //  Draw start screen
+  //  Draw death screen
   else if (levelState === "deathScreen"){
     levelOne.visible = false;
     lazers.visible = false;
     lvlOneBackground.visible = false;
     player.visible = false;
     HUD.visible = false;
-    screenHolder.visible = true;
+    levelOneCollectibles.visible = false;
+    infoText.visible = false;    
 
     titleText.text = " YOU DIED."
     rules.text = "VIEW STATS"
@@ -838,10 +841,21 @@ function managePlayerStates(){
       player.gotHurt = true;
     }
   }
-  if (player.hp === 0 || floor(millis()/1000) > timeLimit){
+  if (player.hp === 0 || floor(millis()/1000 - gameStart) > timeLimit || player.y > lvlOneBase.y + lvlOneBase.height/2){
     levelState = "deathScreen";
-    console.log(levelState);
-    player.timeLasted = floor(millis());
+    player.timeLasted = floor(millis()/1000 - gameStart);
+    player.hp = 5;
+    player.hpHolder = [];
+    for (let hp = 0; hp < player.hp; hp++){
+      heart = new HUD.Sprite();
+      heart.radius = 20;
+      heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
+      heart.color = "red";
+      player.hpHolder.push(heart);
+    }
+    screenHolder.visible = true;
+    infoText.visible = false;    
+    rulesInfo.visible = false;
   }
 }
 
@@ -878,10 +892,8 @@ function collectItems(player, itemSpirte){
     player.wallet[0] = player.wallet[0] + 1;
   }
   itemSpirte.remove();
-  console.log(player.wallet);
 }
 
-//  make lazers under player and change to overlapping
 function lazerFlash(lazerThing){
   if (millis() > lazerThing.interval + lazerThing.lastSwitched){
     // lazerThing.visible = !lazerThing.visible;
@@ -940,6 +952,12 @@ function detectMouseClick(buttonThing){
       rules.lastSwitched = millis();
     }
     else{
+      player.timeLasted = 0;
+      player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
+      player.x = lvlOneBackground.width/2 - wallWidth*5;
+      player.wallet = [0, 0];
+      gameStart = millis()/1000;
+
       levelState = buttonThing.state;
     }
   }
