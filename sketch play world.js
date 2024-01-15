@@ -12,8 +12,9 @@
 let player, orgin, HUD, coinCount, timerCount, BigCoinCount, heart;
 let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
 let solidsGroup = [];
-let screenHolder, startButtons, begin, godModeStart, rules, titleText, infoText, floatText, rulesInfo, deathInfo;
+let screenHolder, startButtons, buttons, begin, godModeStart, godMode, rules, mainRules, titleText, infoText, coinsInfo, healthInfo, timeInfo, floatText, rulesInfo, deathInfo;
 let footStep0, footStep1, jump, jetPack0, wind;
+let endFlag;
 //  Declaring world and camera variables
 let levelState = "startScreen";
 let cameraMovement = 50;
@@ -41,7 +42,7 @@ function preload(){
 
 function setup() {
   //  Set up world
-  new Canvas(1278, 710);
+  new Canvas(1278, 710); //   new Canvas(windowwidth, windowheight);
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;
@@ -389,9 +390,18 @@ function setup() {
   lvlOneWallFifth1.height = wallWidth*10;
   lvlOneWallFifth1.bounciness = levelOne.wallBounciness;
 
-  //  Place player at the top of the level
+  //  Place player and flag at the top of the level
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
   player.x = lvlOneBackground.width/2 - wallWidth*5;
+
+  endFlag = new Sprite();
+  endFlag.x = player.x;
+  endFlag.y = player.y;
+  endFlag.width = 50;
+  endFlag.height = 40;
+  endFlag.collider = "none";
+  endFlag.color = "red";
+  endFlag.visible = false;
 
   levelOneCollectibles = new Group();
   levelOneCollectibles.diameter = wallWidth*1.5;
@@ -462,6 +472,8 @@ function setup() {
   lazers.color = "blue";
   lazers.isSolid = true;
   lazers.visible = false;
+  lazers.lastSwitched = 0;
+
 
   let lazerEntrance = new lazers.Sprite();
   lazerEntrance.x = lvlOneBackground.x;
@@ -469,7 +481,6 @@ function setup() {
   lazerEntrance.height = lazers.thickness;
   lazerEntrance.width = wallWidth*15;
   lazerEntrance.interval = 1600;
-  lazerEntrance.lastSwitched = 0;
 
   let lazerBottom = new lazers.Sprite();
   lazerBottom.x = -wallWidth*52.5;
@@ -477,7 +488,6 @@ function setup() {
   lazerBottom.height = wallWidth*5;
   lazerBottom.width = lazers.thickness*35;
   lazerBottom.interval = 1600;
-  lazerBottom.lastSwitched = 0;
 
   let lazerMiddle = new lazers.Sprite();
   lazerMiddle.x = lvlOneBackground.x;
@@ -485,7 +495,6 @@ function setup() {
   lazerMiddle.height = lazers.thickness;
   lazerMiddle.width = lvlOneBackground.width - wallWidth;
   lazerMiddle.interval = 2600;
-  lazerMiddle.lastSwitched = 0;
 
   let lazerTopLeftRoom = new lazers.Sprite();
   lazerTopLeftRoom.x = -wallWidth*68;
@@ -493,7 +502,6 @@ function setup() {
   lazerTopLeftRoom.height = lazers.thickness;
   lazerTopLeftRoom.width = wallWidth*3;
   lazerTopLeftRoom.interval = 1600;
-  lazerTopLeftRoom.lastSwitched = 0;
 
   for (let i = 5; i>0; i--){  //  Top right room, top floor
     let lazer1 = new lazers.Sprite();
@@ -567,7 +575,8 @@ function setup() {
     lazer7.lastSwitched = i*600;
   }
 
-  //  Create the start screen 
+
+  //  Create the start and screen 
   screenHolder = new Group();
   screenHolder.collider = "none";
   screenHolder.stroke = 1;
@@ -600,12 +609,12 @@ function setup() {
   begin = new buttons.Sprite();
   begin.x = canvas.w/3;
   begin.text = "BEGIN";
-  begin.state = "levelOne"
+  begin.state = "levelOne";
 
   godMode = new buttons.Sprite();
   godMode.x = canvas.w - canvas.w/3;
   godMode.text = "GOD MODE";
-  godMode.state = "godMode"
+  godMode.state = "godMode";
 
   rules = new buttons.Sprite();
   rules.x = canvas.w/2;
@@ -660,7 +669,7 @@ function setup() {
   timeInfo.text = `  ↑
   This shows the current time.
   When it reaches the time limit,
-  ` + timeLimit + ` seconds, you die.`;
+  ` + timeLimit + " seconds, you die.";
 
   mainRules = new rulesInfo.Sprite();
   mainRules.x = canvas.w/2;
@@ -695,6 +704,7 @@ function draw() {
     player.visible = true;
     HUD.visible = true;
     levelOneCollectibles.visible = true;
+    endFlag.visible = true;
 
     screenHolder.visible = false;
 
@@ -741,16 +751,17 @@ function draw() {
     HUD.visible = false;
     levelOneCollectibles.visible = false;
     infoText.visible = false;    
+    endFlag.visible = false;
 
-    titleText.text = " YOU DIED."
-    rules.text = "VIEW STATS"
+    titleText.text = " YOU DIED.";
+    rules.text = "VIEW STATS";
     rulesInfo.text = "";
     mainRules.textSize = 20;
     mainRules.text = `Overall, you:
 
     lasted ` + player.timeLasted + ` seconds
     collected ` + player.wallet[1] + ` special coins
-    collected ` + player.wallet[0] + ` normal coins`
+    collected ` + player.wallet[0] + " normal coins";
 
     screenHolder.draw();
     detectMouseImputs();
@@ -918,7 +929,7 @@ function detectMouseImputs(){
       infoText.text = "Begin the game.";
       begin.color = "red";
       infoText.visible = true;
-      detectMouseClick(begin)
+      detectMouseClick(begin);
     }
     else if (godMode.mouse.hovering()){
       infoText.text = `Begin the game but 
@@ -926,11 +937,11 @@ function detectMouseImputs(){
       can't die.`;
       godMode.color = "red";
       infoText.visible = true;
-      detectMouseClick(godMode)
+      detectMouseClick(godMode);
     }
     else if (millis() > rules.lastSwitched + rules.waitTime){
       rules.color = "Red";
-      detectMouseClick(rules)
+      detectMouseClick(rules);
     }
     infoText.x = mouse.x + infoText.width/2;
     infoText.y = mouse.y - infoText.height/2;
@@ -957,7 +968,7 @@ function detectMouseClick(buttonThing){
       player.x = lvlOneBackground.width/2 - wallWidth*5;
       player.wallet = [0, 0];
       gameStart = millis()/1000;
-
+      lazers.lastSwitched = millis();
       levelState = buttonThing.state;
     }
   }
