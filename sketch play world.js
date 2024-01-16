@@ -395,14 +395,18 @@ function setup() {
   player.x = lvlOneBackground.width/2 - wallWidth*5;
 
   endFlag = new Sprite();
+  endFlag.width = 20;
+  endFlag.height = 100;
   endFlag.x = player.x;
-  endFlag.y = player.y;
-  endFlag.width = 50;
-  endFlag.height = 40;
+  endFlag.y = lvlOneFloorFifthLeft.y - lvlOneFloorFifthLeft.height/2 - endFlag.height/2;
   endFlag.collider = "none";
   endFlag.color = "red";
   endFlag.visible = false;
+  endFlag.winTotal = 0;
+  endFlag.winsRow = 0;
+  endFlag.win = false;
 
+  //  Create collectibles
   levelOneCollectibles = new Group();
   levelOneCollectibles.diameter = wallWidth*1.5;
   levelOneCollectibles.collider = "none";
@@ -684,6 +688,8 @@ function setup() {
 
   Controll the character using WASD or arrow keys. Use space to 
   jump and shift to dash.`;
+
+  levelOneCollectibles.y = lvlOneFloorFifthLeft.y-50;
 }
 
 function draw() {
@@ -705,28 +711,35 @@ function draw() {
     HUD.visible = true;
     levelOneCollectibles.visible = true;
     endFlag.visible = true;
-
     screenHolder.visible = false;
+    titleText.visible = false;
 
     //  Update text
     timerCount.text = floor(millis()/1000 - gameStart);
     BigCoinCount.text = player.wallet[1];
     coinCount.text = player.wallet[0];
 
+    //  Do all detection functions
+    managePlayerStates();
+    detectPlayerImput();
+    checkWallet();
+
+    //  Draw everything
     camera.on();
     lvlOneBackground.draw();
     lazers.draw();
     levelOne.draw();
+    levelOneCollectibles.draw();
+    endFlag.draw();
 
-    //  Do all functions
-    managePlayerStates();
-    detectPlayerImput();
+    //  Do visual functions
     player.overlaps(levelOneCollectibles, collectItems);
+    player.overlaps(endFlag, detectWin);
+
     for (let lazer of lazers){
       lazerFlash(lazer);
     }
-    //  Only let the player take damage if in normal mode 
-    if (levelState === "levelOne"){
+    if (levelState === "levelOne"){ //  Only let the player take damage if in normal mode 
       deathCoolDown(millis());
     }
     else {
@@ -740,6 +753,7 @@ function draw() {
     //  Draw HUD
     camera.off();
     HUD.draw();
+    titleText.draw();
   } 
 
   //  Draw death screen
@@ -750,7 +764,7 @@ function draw() {
     player.visible = false;
     HUD.visible = false;
     levelOneCollectibles.visible = false;
-    infoText.visible = false;    
+    infoText.visible = false;
     endFlag.visible = false;
 
     titleText.text = " YOU DIED.";
@@ -762,6 +776,35 @@ function draw() {
     lasted ` + player.timeLasted + ` seconds
     collected ` + player.wallet[1] + ` special coins
     collected ` + player.wallet[0] + " normal coins";
+
+    screenHolder.draw();
+    detectMouseImputs();
+  }
+
+  //  Draw death screen
+  else if (levelState === "winScreen"){
+    levelOne.visible = false;
+    lazers.visible = false;
+    lvlOneBackground.visible = false;
+    player.visible = false;
+    HUD.visible = false;
+    levelOneCollectibles.visible = false;
+    infoText.visible = false;
+    endFlag.visible = false;
+
+    titleText.text = " YOU WOM!";
+    rules.text = "VIEW STATS";
+    rulesInfo.text = "";
+    mainRules.textSize = 20;
+    player.timeLeft = timeLimit - player.timeLasted;
+    mainRules.text = `Overall, you:
+
+    finished in ` + player.timeLasted + ` seconds, 
+    you had` + player.timeLeft `seconds left!
+    collected ` + player.wallet[1] + ` special coins
+    collected ` + player.wallet[0] + ` normal coins
+    won` + endFlag.winTotal + `times, and
+    won` + endFlag.winsRow + `times in a row`;
 
     screenHolder.draw();
     detectMouseImputs();
@@ -854,19 +897,11 @@ function managePlayerStates(){
   }
   if (player.hp === 0 || floor(millis()/1000 - gameStart) > timeLimit || player.y > lvlOneBase.y + lvlOneBase.height/2){
     levelState = "deathScreen";
-    player.timeLasted = floor(millis()/1000 - gameStart);
-    player.hp = 5;
-    player.hpHolder = [];
-    for (let hp = 0; hp < player.hp; hp++){
-      heart = new HUD.Sprite();
-      heart.radius = 20;
-      heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
-      heart.color = "red";
-      player.hpHolder.push(heart);
-    }
+    resetGame();
     screenHolder.visible = true;
     infoText.visible = false;    
     rulesInfo.visible = false;
+    endFlag.winsRow = 0;
   }
 }
 
@@ -903,6 +938,47 @@ function collectItems(player, itemSpirte){
     player.wallet[0] = player.wallet[0] + 1;
   }
   itemSpirte.remove();
+}
+
+function checkWallet(){
+  if (player.wallet[1] === totalBigCoins){
+    endFlag.color = "green";
+    endFlag.win = true;
+    titleText.text = `You've collected all the big coins!
+    make your way back to the start to win.`;
+    titleText.visible = true;
+  }
+  else {
+    titleText.visible = false;
+    endFlag.color = "red";
+  }
+}
+
+function detectWin() {
+  if (endFlag.win){
+    endFlag.winTotal ++;
+    endFlag.winsRow ++;
+    endFlag.win = false;
+    levelState = "winScreen";
+  }
+}
+
+function resetGame(){
+  player.timeLasted = floor(millis()/1000 - gameStart);
+  player.hp = 5;
+  player.hpHolder = [];
+  player.wallet = [0,0];
+  player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
+  player.x = lvlOneBackground.width/2 - wallWidth*5;
+  for (let hp = 0; hp < player.hp; hp++){
+    heart = new HUD.Sprite();
+    heart.radius = 20;
+    heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
+    heart.color = "red";
+    player.hpHolder.push(heart);
+  }
+  gameStart = millis()/1000;
+  lazers.lastSwitched = millis();
 }
 
 function lazerFlash(lazerThing){
@@ -963,12 +1039,7 @@ function detectMouseClick(buttonThing){
       rules.lastSwitched = millis();
     }
     else{
-      player.timeLasted = 0;
-      player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
-      player.x = lvlOneBackground.width/2 - wallWidth*5;
-      player.wallet = [0, 0];
-      gameStart = millis()/1000;
-      lazers.lastSwitched = millis();
+      resetGame();
       levelState = buttonThing.state;
     }
   }
