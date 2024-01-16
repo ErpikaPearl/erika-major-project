@@ -8,31 +8,39 @@
 
 //  Declaring Variables
 
-//  Declaring sprites, assets and groups
-let player, orgin, HUD, coinCount, timerCount, BigCoinCount, heart;
-let lvlOneBackground, levelOne, levelOneCollectibles, lvlOneBase, lazers;
-let solidsGroup = [];
-let screenHolder, startButtons, buttons, begin, godModeStart, godMode, rules, mainRules, titleText, infoText, coinsInfo, healthInfo, timeInfo, floatText, rulesInfo, deathInfo;
-let footStep0, footStep1, jump, jetPack0, wind;
+//  Declaring sprites, assets and groups (Those defined in the same line relate to similar things)
+let player;
+let lazers;
 let endFlag;
+let solidsGroup = [];
+let HUD, coinCount, timerCount, BigCoinCount, heart;  //  HUD and children
+let lvlOneBackground, levelOne, collectibles, lvlOneBase; //  spites used to construct level one
+let lvlOnePlaformFifthLeftmost, lvlOnePlaformThirdLeft, lvlOneFloorThirdLeft, lvlOneFloorSecond, lvlOneFloorBottom, lvlOneFloorFirstLeft, lvlOneFloorFourthLeft;  //  Platforms that need to be global
+let screenHolder, titleText, buttons, floatText; // screenholder and children
+let begin, godMode, dropdown;  // Children of butons
+let infoText, dropdownInfo;  //  Children of floatText
+let coinsInfo, healthInfo, timeInfo, mainRules; // Children of dropdownInfo
+let footStep0, footStep1, jump, jetPack0, wind; //  Sound files
+
 //  Declaring world and camera variables
 let levelState = "startScreen";
 let cameraMovement = 50;
 let wallWidth = 50;
-let level = "One";
 let totalCoins = 0;
 let totalBigCoins = 6;
 let timeLimit = 120;
 let gameStart = 0;
 
+
 //  Load in assets
 function preload(){
+  //  Load in sounds
   footStep0 = loadSound("Assets/footstep00.ogg");
   footStep1 = loadSound("Assets/footstep01.ogg");
   jump = loadSound("Assets/jump.wav");
   jetPack0 = loadSound("Assets/jetpack0.wav");
   wind = loadSound("Assets/wind.wav");
-
+  //  Set sounds volu,e
   footStep0.setVolume(0.1);
   footStep1.setVolume(0.08);
   jump.setVolume(1);
@@ -48,46 +56,45 @@ function setup() {
   world.gravity.y = 9.8;
   allSprites.autoCull = false;  //  Prevents sprites from dissapearing when too far away from the camera
   camera.zoom = 0.9;
-  // camera.zoom = 0.1;
 
   //  Set up player
   player = new Sprite();
   player.width = 50;
   player.height = 80;
   player.mass = 70;
-  player.color = "red";
   player.collider = "dynamic";
+  player.color = "red";
   player.visible = false;
   player.rotationLock = true;
   player.bounciness = 0;
   player.hp = 5;
   player.hpHolder = [];
   player.lastHurt = 0;
+  player.wallet = [0, 0];
   player.gotHurt = false;
-  player.timeLasted = 0;
   player.invulnerable = false;
+  player.timeLasted = 0;
   player.maxSpeed = 10;
   player.doubleJump = false;
   player.dash = true;
   player.lastSwitchedDash = 0;
   player.isOnGround = false;
-  player.wallet = [0, 0];
 
   //  Set up HUD
   HUD = new Group();
+  HUD.y = 50;
   HUD.collider = "none";
   HUD.color = "white"; 
-  HUD.y = 50;
   HUD.visible = false;
 
   BigCoinCount = new HUD.Sprite();
   BigCoinCount.x = 50;
   BigCoinCount.width = 60;
   BigCoinCount.height = 60;
+  BigCoinCount.color = "pink";
   BigCoinCount.text = player.wallet[0];
   BigCoinCount.textSize = 40;
-  BigCoinCount.color = "pink";
-
+ 
   coinCount = new HUD.Sprite();
   coinCount.x = BigCoinCount.x + BigCoinCount.width/2 + 50;
   coinCount.width = 60;
@@ -102,50 +109,44 @@ function setup() {
   timerCount.textSize = 40;
 
   for (let hp = 0; hp < player.hp; hp++){
-    let heart = new HUD.Sprite();
+    heart = new HUD.Sprite();
     heart.radius = 20;
     heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
     heart.color = "red";
     player.hpHolder.push(heart);
   }
 
-
   //  Set up Level one
   //Note to Mr. Schellenberg: The levels are set up by making a sprite for each floor, wall, and platform.
   //This is very inefficient but there is no easier way to do this using p5 Play. I could have used p5 Play's
   //Tiles constructor, but this greatly limits what I would be able to do using the tiles. For example, I 
   //Wouldn't have been able to have the player interact differently will walls and floors.
-  levelOne = new Group();
-  levelOne.color = "green";
-  levelOne.stroke = levelOne.color;
+  
+  levelOne = new Group(); //  Holds all walls, platforms, and floors 
   levelOne.collider = "static";
+  levelOne.color = "green";
+  levelOne.visible = false;
+  levelOne.stroke = levelOne.color;
   levelOne.friction = 4;
   levelOne.bounciness = 0.05;
   levelOne.wallBounciness = 0.3;
-  levelOne.visible = false;
 
-  lvlOneBackground = new Sprite();
-  lvlOneBackground.color = "orange";
-  lvlOneBackground.collider = "n";
+  lvlOneBackground = new Sprite();  //  the background for inside the building
   lvlOneBackground.x = 0;
   lvlOneBackground.y = 0;
   lvlOneBackground.width = 7000;
   lvlOneBackground.height = 2000;
+  lvlOneBackground.collider = "n";
+  lvlOneBackground.color = "orange";
   lvlOneBackground.visible = false;
 
-  lvlOneBase = new levelOne.Sprite();
-  lvlOneBase.color = "green";
-  lvlOneBase.collider = "n";
+  lvlOneBase = new levelOne.Sprite(); //  The green base below it
   lvlOneBase.x = 0;
   lvlOneBase.y = lvlOneBackground.y + lvlOneBackground.height - 2;
   lvlOneBase.width = lvlOneBackground.width + wallWidth;
   lvlOneBase.height = 2000;
-
-  // orgin = new Sprite();
-  // orgin.diameter = 60;
-  // orgin.x = 0;
-  // orgin.y = 0;
-  // orgin.collider = "static";
+  lvlOneBase.collider = "n";
+  lvlOneBase.color = "green";  
   
   //  Create walls and floors
   let lvlOneLeftWall = new levelOne.Sprite();
@@ -154,7 +155,6 @@ function setup() {
   lvlOneLeftWall.width = wallWidth;
   lvlOneLeftWall.height = lvlOneBackground.height;
   lvlOneLeftWall.bounciness = levelOne.wallBounciness;
-  // lvlOneLeftWall.visible = false;
 
   let lvlOneRightWall = new levelOne.Sprite();
   lvlOneRightWall.x = lvlOneBackground.x + lvlOneBackground.width/2;
@@ -163,14 +163,14 @@ function setup() {
   lvlOneRightWall.height = lvlOneBackground.height;
   lvlOneRightWall.bounciness = levelOne.wallBounciness;
 
-  let lvlOneFloorBottom = new levelOne.Sprite();
+  lvlOneFloorBottom = new levelOne.Sprite();
   lvlOneFloorBottom.x = lvlOneBackground.x;
   lvlOneFloorBottom.y = lvlOneBackground.y + lvlOneBackground.height/2;
   lvlOneFloorBottom.width = lvlOneBackground.width + wallWidth;
   lvlOneFloorBottom.height = wallWidth;
   solidsGroup.push(lvlOneFloorBottom);
 
-  let lvlOneFloorFirstLeft = new levelOne.Sprite();
+  lvlOneFloorFirstLeft = new levelOne.Sprite();
   lvlOneFloorFirstLeft.x = lvlOneBackground.x - wallWidth*3;
   lvlOneFloorFirstLeft.y = lvlOneFloorBottom.y - wallWidth*6;
   lvlOneFloorFirstLeft.width = lvlOneBackground.width - wallWidth*6;
@@ -183,14 +183,14 @@ function setup() {
   lvlOneFloorFirstRight.height = wallWidth;
   solidsGroup.push(lvlOneFloorFirstRight);
 
-  let lvlOneFloorSecond = new levelOne.Sprite();
+  lvlOneFloorSecond = new levelOne.Sprite();
   lvlOneFloorSecond.x = lvlOneBackground.x + wallWidth*3;
   lvlOneFloorSecond.y = lvlOneFloorFirstLeft.y - wallWidth*5;
   lvlOneFloorSecond.width = lvlOneBackground.width - wallWidth*5;
   lvlOneFloorSecond.height = wallWidth;
   solidsGroup.push(lvlOneFloorSecond);
 
-  let lvlOneFloorThirdLeft = new levelOne.Sprite();
+  lvlOneFloorThirdLeft = new levelOne.Sprite();
   lvlOneFloorThirdLeft.x = lvlOneBackground.x - wallWidth*10;
   lvlOneFloorThirdLeft.y = lvlOneFloorSecond.y - wallWidth*10;
   lvlOneFloorThirdLeft.width = lvlOneBackground.width - wallWidth*20;
@@ -209,7 +209,7 @@ function setup() {
   lvlOneFloorFourthRight.width = lvlOneBackground.width - wallWidth*20;
   lvlOneFloorFourthRight.height = wallWidth;
   solidsGroup.push(lvlOneFloorFourthRight);
-  let lvlOneFloorFourthLeft = new levelOne.Sprite();
+  lvlOneFloorFourthLeft = new levelOne.Sprite();
   lvlOneFloorFourthLeft.x = -(lvlOneBackground.x + wallWidth*64);
   lvlOneFloorFourthLeft.y = lvlOneFloorFourthRight.y;
   lvlOneFloorFourthLeft.width = lvlOneBackground.width/8 - wallWidth*5;
@@ -237,7 +237,7 @@ function setup() {
   lvlOnePlaformFirst.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFirst);
 
-  let lvlOnePlaformThirdLeft = new levelOne.Sprite();
+  lvlOnePlaformThirdLeft = new levelOne.Sprite();
   lvlOnePlaformThirdLeft.x = lvlOneBackground.x - wallWidth*25;
   lvlOnePlaformThirdLeft.y = lvlOneFloorSecond.y - wallWidth*4;
   lvlOnePlaformThirdLeft.width = wallWidth*35;
@@ -293,7 +293,7 @@ function setup() {
   lvlOnePlaformFifthRightmost1.width = wallWidth*5;
   lvlOnePlaformFifthRightmost1.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthRightmost1);
-  let lvlOnePlaformFifthLeftmost = new levelOne.Sprite();
+  lvlOnePlaformFifthLeftmost = new levelOne.Sprite();
   lvlOnePlaformFifthLeftmost.x = lvlOneBackground.x - wallWidth*65;
   lvlOnePlaformFifthLeftmost.y = lvlOneFloorFourthRight.y - wallWidth*4;
   lvlOnePlaformFifthLeftmost.width = wallWidth*4;
@@ -406,68 +406,15 @@ function setup() {
   endFlag.winsRow = 0;
   endFlag.win = false;
 
-  //  Create collectibles
-  levelOneCollectibles = new Group();
-  levelOneCollectibles.diameter = wallWidth*1.5;
-  levelOneCollectibles.collider = "none";
-  levelOneCollectibles.color = "pink";
-  levelOneCollectibles.special = true;
-  levelOneCollectibles.visible = false;
+  //  Create group for collectibles
+  collectibles = new Group();
+  collectibles.diameter = wallWidth*1.5;
+  collectibles.collider = "none";
+  collectibles.color = "pink";
+  collectibles.special = true;
+  collectibles.visible = false;
 
-  let bigCoin1 = new levelOneCollectibles.Sprite();
-  bigCoin1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5;
-  bigCoin1.x = -lvlOneBackground.width/2 + wallWidth*3;
-  let bigCoin2 = new levelOneCollectibles.Sprite();
-  bigCoin2.y = lvlOnePlaformFifthLeftmost.y - wallWidth*4;
-  bigCoin2.x = lvlOneBackground.x + wallWidth*24;
-  let bigCoin3 = new levelOneCollectibles.Sprite();
-  bigCoin3.y = lvlOneFloorThirdLeft.y - wallWidth*2;
-  bigCoin3.x = -lvlOneBackground.width/2 + wallWidth*2;
-  let bigCoin4 = new levelOneCollectibles.Sprite();
-  bigCoin4.y = lvlOneFloorSecond.y - wallWidth*6;
-  bigCoin4.x = lvlOneBackground.x - wallWidth*28;
-  let bigCoin5 = new levelOneCollectibles.Sprite();
-  bigCoin5.y = lvlOneFloorSecond.y - wallWidth*6;
-  bigCoin5.x = lvlOneBackground.width/2 - wallWidth*2;
-  let bigCoin6 = new levelOneCollectibles.Sprite();
-  bigCoin6.y = lvlOneFloorBottom.y - wallWidth*2;
-  bigCoin6.x = -lvlOneBackground.width/2 + wallWidth*2;
-
-  let floor0 = 6;
-  let floor1 = 4;
-  let floor2 = 6;
-  let floor3 = 4;
-  let floor4 = 6;
-  totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
-  for (let i = 0; i < totalCoins; i++){
-    let coin = new levelOneCollectibles.Sprite();
-    coin.color = "yellow";
-    coin.diameter = wallWidth;
-    coin.special = false;
-    if (floor0 > 0){
-      coin.y = lvlOneFloorBottom.y - wallWidth*2;
-      floor0 --;
-    }
-    else if (floor1 > 0){
-      coin.y = lvlOneFloorFirstLeft.y - wallWidth*2;
-      floor1 --;
-    }
-    else if (floor2 > 0){
-      coin.y = lvlOneFloorSecond.y - wallWidth*2;
-      floor2 --;
-    }
-    else if (floor3 > 0){
-      coin.y = lvlOneFloorThirdLeft.y - wallWidth*2;
-      floor3 --;
-    }
-    else if (floor4 > 0){
-      coin.y = lvlOneFloorFourthLeft.y - wallWidth*2;
-      floor4 --;
-    }
-    coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
-  }
-
-  //  Create hostiles
+  //  Create lazers
   lazers = new Group();
   lazers.y = windowHeight/2;
   lazers.x = windowWidth/2;
@@ -477,7 +424,6 @@ function setup() {
   lazers.isSolid = true;
   lazers.visible = false;
   lazers.lastSwitched = 0;
-
 
   let lazerEntrance = new lazers.Sprite();
   lazerEntrance.x = lvlOneBackground.x;
@@ -579,8 +525,7 @@ function setup() {
     lazer7.lastSwitched = i*600;
   }
 
-
-  //  Create the start and screen 
+  //  Create the objects to hold start, end, and win screen 
   screenHolder = new Group();
   screenHolder.collider = "none";
   screenHolder.stroke = 1;
@@ -620,15 +565,15 @@ function setup() {
   godMode.text = "GOD MODE";
   godMode.state = "godMode";
 
-  rules = new buttons.Sprite();
-  rules.x = canvas.w/2;
-  rules.y = canvas.h/3;
-  rules.height = wallWidth;
-  rules.width = wallWidth*8;
-  rules.text = "RULES";
-  rules.state = "rules";
-  rules.lastSwitched = 0;
-  rules.waitTime = 200;
+  dropdown = new buttons.Sprite(); 
+  dropdown.x = canvas.w/2;
+  dropdown.y = canvas.h/3;
+  dropdown.height = wallWidth;
+  dropdown.width = wallWidth*8;
+  dropdown.text = "RULES";
+  dropdown.state = "rules";
+  dropdown.lastSwitched = 0;
+  dropdown.waitTime = 200;
 
   floatText = new screenHolder.Group();
   floatText.width = wallWidth*5;
@@ -638,10 +583,10 @@ function setup() {
 
   infoText = new floatText.Sprite();
 
-  rulesInfo = new floatText.Group();
-  rulesInfo.textSize = 13;
+  dropdownInfo = new floatText.Group();
+  dropdownInfo.textSize = 13;
 
-  healthInfo = new rulesInfo.Sprite();
+  healthInfo = new dropdownInfo.Sprite();
   healthInfo.x = wallWidth*6.5;
   healthInfo.y = wallWidth*2.5;
   healthInfo.width = 0;
@@ -650,7 +595,7 @@ function setup() {
   This shows you your current health.
   When it reaches zero you die`;
 
-  coinsInfo = new rulesInfo.Sprite();
+  coinsInfo = new dropdownInfo.Sprite();
   coinsInfo.x = wallWidth*2.8;
   coinsInfo.y = wallWidth*3.7;
   coinsInfo.width = 0;
@@ -665,7 +610,7 @@ function setup() {
   the white coins are the amount 
   of normal coins you have`;
 
-  timeInfo = new rulesInfo.Sprite();
+  timeInfo = new dropdownInfo.Sprite();
   timeInfo.x = wallWidth*21.9;
   timeInfo.y = wallWidth*2.8;
   timeInfo.width = 0;
@@ -675,12 +620,11 @@ function setup() {
   When it reaches the time limit,
   ` + timeLimit + " seconds, you die.";
 
-  mainRules = new rulesInfo.Sprite();
+  mainRules = new dropdownInfo.Sprite();
   mainRules.x = canvas.w/2;
   mainRules.height = wallWidth*3.5;
-  mainRules.width = rules.width;
-  mainRules.y = rules.y + rules.height/2 + mainRules.height/2;
-  // mainRules.textSize = 13;
+  mainRules.width = dropdown.width;
+  mainRules.y = dropdown.y + dropdown.height/2 + mainRules.height/2;
   mainRules.text = `The point of this game is to collect all of the special (pink) coins 
   in the level and then get back to the top within the time frame. 
   The small coins give you extra points but are not necessary to 
@@ -688,8 +632,6 @@ function setup() {
 
   Controll the character using WASD or arrow keys. Use space to 
   jump and shift to dash.`;
-
-  levelOneCollectibles.y = lvlOneFloorFifthLeft.y-50;
 }
 
 function draw() {
@@ -697,22 +639,21 @@ function draw() {
 
   //  Draw start screen
   if (levelState === "startScreen"){
-    screenHolder.draw();
     detectMouseImputs();
+    screenHolder.draw();
   }
 
   //  Draw level one
   else if (levelState === "levelOne" || levelState === "godMode"){
-    //  Make level visible
+    //  Manage visibility
     levelOne.visible = true;
-    lazers.visible = true;
     lvlOneBackground.visible = true;
+    lazers.visible = true;
     player.visible = true;
     HUD.visible = true;
-    levelOneCollectibles.visible = true;
+    collectibles.visible = true;
     endFlag.visible = true;
     screenHolder.visible = false;
-    titleText.visible = false;
 
     //  Update text
     timerCount.text = floor(millis()/1000 - gameStart);
@@ -729,13 +670,12 @@ function draw() {
     lvlOneBackground.draw();
     lazers.draw();
     levelOne.draw();
-    levelOneCollectibles.draw();
+    collectibles.draw();
     endFlag.draw();
 
     //  Do visual functions
-    player.overlaps(levelOneCollectibles, collectItems);
+    player.overlaps(collectibles, collectItems);
     player.overlaps(endFlag, detectWin);
-
     for (let lazer of lazers){
       lazerFlash(lazer);
     }
@@ -758,18 +698,20 @@ function draw() {
 
   //  Draw death screen
   else if (levelState === "deathScreen"){
+    //  Manage visibility
     levelOne.visible = false;
-    lazers.visible = false;
     lvlOneBackground.visible = false;
+    lazers.visible = false;
     player.visible = false;
     HUD.visible = false;
-    levelOneCollectibles.visible = false;
+    collectibles.visible = false;
     infoText.visible = false;
     endFlag.visible = false;
 
+    //  Update text
     titleText.text = " YOU DIED.";
-    rules.text = "VIEW STATS";
-    rulesInfo.text = "";
+    dropdown.text = "VIEW STATS";
+    dropdownInfo.text = "";
     mainRules.textSize = 20;
     mainRules.text = `Overall, you:
 
@@ -777,43 +719,48 @@ function draw() {
     collected ` + player.wallet[1] + ` special coins
     collected ` + player.wallet[0] + " normal coins";
 
-    screenHolder.draw();
+    //  Draw screen
     detectMouseImputs();
+    screenHolder.draw();
   }
 
-  //  Draw death screen
+  //  Draw win screen
   else if (levelState === "winScreen"){
+    //  Manage visibility
     levelOne.visible = false;
-    lazers.visible = false;
     lvlOneBackground.visible = false;
+    lazers.visible = false;
     player.visible = false;
     HUD.visible = false;
-    levelOneCollectibles.visible = false;
+    collectibles.visible = false;
     infoText.visible = false;
     endFlag.visible = false;
 
-    titleText.text = " YOU WOM!";
-    rules.text = "VIEW STATS";
-    rulesInfo.text = "";
+    //  Update text
+    titleText.text = " YOU WON!";
+    dropdown.text = "VIEW STATS";
+    dropdownInfo.text = "";
     mainRules.textSize = 20;
     player.timeLeft = timeLimit - player.timeLasted;
     mainRules.text = `Overall, you:
 
     finished in ` + player.timeLasted + ` seconds, 
-    you had` + player.timeLeft `seconds left!
     collected ` + player.wallet[1] + ` special coins
     collected ` + player.wallet[0] + ` normal coins
-    won` + endFlag.winTotal + `times, and
-    won` + endFlag.winsRow + `times in a row`;
+    won ` + endFlag.winTotal + ` time(s), and
+    won ` + endFlag.winsRow + ` time(s) in a row`;
 
-    screenHolder.draw();
+    //      you had` + player.timeLeft `seconds left!
+
+    //  Draw screen
     detectMouseImputs();
+    screenHolder.draw();
   }
   
 }
 
 function mousePressed(){
-  if(!wind.isPlaying() && level === "One"){
+  if(!wind.isPlaying()){
     wind.loop();
   }
 }
@@ -897,10 +844,9 @@ function managePlayerStates(){
   }
   if (player.hp === 0 || floor(millis()/1000 - gameStart) > timeLimit || player.y > lvlOneBase.y + lvlOneBase.height/2){
     levelState = "deathScreen";
-    resetGame();
     screenHolder.visible = true;
     infoText.visible = false;    
-    rulesInfo.visible = false;
+    dropdownInfo.visible = false;
     endFlag.winsRow = 0;
   }
 }
@@ -959,26 +905,26 @@ function detectWin() {
     endFlag.winTotal ++;
     endFlag.winsRow ++;
     endFlag.win = false;
+    screenHolder.visible = true;
+    infoText.visible = false;    
+    dropdownInfo.visible = false;
     levelState = "winScreen";
   }
 }
 
 function resetGame(){
   player.timeLasted = floor(millis()/1000 - gameStart);
-  player.hp = 5;
-  player.hpHolder = [];
   player.wallet = [0,0];
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
   player.x = lvlOneBackground.width/2 - wallWidth*5;
-  for (let hp = 0; hp < player.hp; hp++){
-    heart = new HUD.Sprite();
-    heart.radius = 20;
-    heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
-    heart.color = "red";
-    player.hpHolder.push(heart);
-  }
+  player.invulnerable = false;
+
   gameStart = millis()/1000;
   lazers.lastSwitched = millis();
+  endFlag.win = false;
+
+  createCollectibles();
+  createHP();
 }
 
 function lazerFlash(lazerThing){
@@ -1000,7 +946,7 @@ function lazerFlash(lazerThing){
 }
 
 function detectMouseImputs(){
-  if (begin.mouse.hovering() || godMode.mouse.hovering() || rules.mouse.hovering()){
+  if (begin.mouse.hovering() || godMode.mouse.hovering() || dropdown.mouse.hovering()){
     if (begin.mouse.hovering()){
       infoText.text = "Begin the game.";
       begin.color = "red";
@@ -1015,9 +961,9 @@ function detectMouseImputs(){
       infoText.visible = true;
       detectMouseClick(godMode);
     }
-    else if (millis() > rules.lastSwitched + rules.waitTime){
-      rules.color = "Red";
-      detectMouseClick(rules);
+    else if (millis() > dropdown.lastSwitched + dropdown.waitTime){
+      dropdown.color = "Red";
+      detectMouseClick(dropdown);
     }
     infoText.x = mouse.x + infoText.width/2;
     infoText.y = mouse.y - infoText.height/2;
@@ -1031,16 +977,91 @@ function detectMouseImputs(){
 function detectMouseClick(buttonThing){
 
   if (buttonThing.mouse.pressing()){
-    if (buttonThing === rules){
-      rulesInfo.visible = !rulesInfo.visible;
+    if (buttonThing === dropdown){
+      dropdownInfo.visible = !dropdownInfo.visible;
       if (levelState === "startScreen"){
         HUD.visible = !HUD.visible;
       }
-      rules.lastSwitched = millis();
+      dropdown.lastSwitched = millis();
     }
     else{
       resetGame();
       levelState = buttonThing.state;
     }
   }
+}
+
+function createHP(){
+  for (let theSprites of player.hpHolder){
+    theSprites.remove();
+  }
+  player.hp = 5;
+  player.hpHolder = [];
+  for (let hp = 0; hp < player.hp; hp++){
+    heart = new HUD.Sprite();
+    heart.radius = 20;
+    heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
+    heart.color = "red";
+    player.hpHolder.push(heart);
+  }
+}
+
+function createCollectibles(){
+  for (theSprites of collectibles){
+    theSprites.remove();
+  }
+
+  let bigCoin1 = new collectibles.Sprite();
+  bigCoin1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5;
+  bigCoin1.x = -lvlOneBackground.width/2 + wallWidth*3;
+  let bigCoin2 = new collectibles.Sprite();
+  bigCoin2.y = lvlOnePlaformFifthLeftmost.y - wallWidth*4;
+  bigCoin2.x = lvlOneBackground.x + wallWidth*24;
+  let bigCoin3 = new collectibles.Sprite();
+  bigCoin3.y = lvlOneFloorThirdLeft.y - wallWidth*2;
+  bigCoin3.x = -lvlOneBackground.width/2 + wallWidth*2;
+  let bigCoin4 = new collectibles.Sprite();
+  bigCoin4.y = lvlOneFloorSecond.y - wallWidth*6;
+  bigCoin4.x = lvlOneBackground.x - wallWidth*28;
+  let bigCoin5 = new collectibles.Sprite();
+  bigCoin5.y = lvlOneFloorSecond.y - wallWidth*6;
+  bigCoin5.x = lvlOneBackground.width/2 - wallWidth*2;
+  let bigCoin6 = new collectibles.Sprite();
+  bigCoin6.y = lvlOneFloorBottom.y - wallWidth*2;
+  bigCoin6.x = -lvlOneBackground.width/2 + wallWidth*2;
+
+  let floor0 = 6;
+  let floor1 = 4;
+  let floor2 = 6;
+  let floor3 = 4;
+  let floor4 = 6;
+  totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
+  for (let i = 0; i < totalCoins; i++){
+    let coin = new collectibles.Sprite();
+    coin.color = "yellow";
+    coin.diameter = wallWidth;
+    coin.special = false;
+    if (floor0 > 0){
+      coin.y = lvlOneFloorBottom.y - wallWidth*2;
+      floor0 --;
+    }
+    else if (floor1 > 0){
+      coin.y = lvlOneFloorFirstLeft.y - wallWidth*2;
+      floor1 --;
+    }
+    else if (floor2 > 0){
+      coin.y = lvlOneFloorSecond.y - wallWidth*2;
+      floor2 --;
+    }
+    else if (floor3 > 0){
+      coin.y = lvlOneFloorThirdLeft.y - wallWidth*2;
+      floor3 --;
+    }
+    else if (floor4 > 0){
+      coin.y = lvlOneFloorFourthLeft.y - wallWidth*2;
+      floor4 --;
+    }
+    coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
+  }
+  collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
 }
