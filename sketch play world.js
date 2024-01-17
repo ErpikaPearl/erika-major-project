@@ -6,6 +6,8 @@
 // - describe what you did to take this project "above and beyond"
 
 
+//  WHAT TO FIX: weird wall in middle of level. 
+
 //  Declaring Variables
 
 //  Declaring sprites, assets and groups (Those defined in the same line relate to similar things)
@@ -637,10 +639,15 @@ function setup() {
 function draw() {
   clear();
 
+  //  Always let the lazers flash so they keep at the same interval
+  for (let lazer of lazers){
+    lazerFlash(lazer);
+  }
+
   //  Draw start screen
   if (levelState === "startScreen"){
-    detectMouseImputs();
     screenHolder.draw();
+    detectMouseImputs();
   }
 
   //  Draw level one
@@ -676,9 +683,6 @@ function draw() {
     //  Do visual functions
     player.overlaps(collectibles, collectItems);
     player.overlaps(endFlag, detectWin);
-    for (let lazer of lazers){
-      lazerFlash(lazer);
-    }
     if (levelState === "levelOne"){ //  Only let the player take damage if in normal mode 
       deathCoolDown(millis());
     }
@@ -720,8 +724,8 @@ function draw() {
     collected ` + player.wallet[0] + " normal coins";
 
     //  Draw screen
-    detectMouseImputs();
     screenHolder.draw();
+    detectMouseImputs();
   }
 
   //  Draw win screen
@@ -753,8 +757,8 @@ function draw() {
     //      you had` + player.timeLeft `seconds left!
 
     //  Draw screen
-    detectMouseImputs();
     screenHolder.draw();
+    detectMouseImputs();
   }
   
 }
@@ -848,6 +852,7 @@ function managePlayerStates(){
     infoText.visible = false;    
     dropdownInfo.visible = false;
     endFlag.winsRow = 0;
+    player.timeLasted = floor(millis()/1000 - gameStart);
   }
 }
 
@@ -908,19 +913,19 @@ function detectWin() {
     screenHolder.visible = true;
     infoText.visible = false;    
     dropdownInfo.visible = false;
+    player.timeLasted = floor(millis()/1000 - gameStart);
     levelState = "winScreen";
   }
 }
 
 function resetGame(){
-  player.timeLasted = floor(millis()/1000 - gameStart);
   player.wallet = [0,0];
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
   player.x = lvlOneBackground.width/2 - wallWidth*5;
   player.invulnerable = false;
 
   gameStart = millis()/1000;
-  lazers.lastSwitched = millis();
+  // lazers.lastSwitched = millis();
   endFlag.win = false;
 
   createCollectibles();
@@ -1063,5 +1068,5 @@ function createCollectibles(){
     }
     coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
   }
-  collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
+  // collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
 }
