@@ -661,6 +661,7 @@ function draw() {
     collectibles.visible = true;
     endFlag.visible = true;
     screenHolder.visible = false;
+    buttons.collider = "none";
 
     //  Update text
     timerCount.text = floor(millis()/1000 - gameStart);
@@ -711,6 +712,7 @@ function draw() {
     collectibles.visible = false;
     infoText.visible = false;
     endFlag.visible = false;
+    buttons.collider = "static";
 
     //  Update text
     titleText.text = " YOU DIED.";
@@ -744,24 +746,23 @@ function draw() {
     titleText.text = " YOU WON!";
     dropdown.text = "VIEW STATS";
     dropdownInfo.text = "";
-    mainRules.textSize = 20;
+    mainRules.textSize = 17;
     player.timeLeft = timeLimit - player.timeLasted;
     mainRules.text = `Overall, you:
 
     finished in ` + player.timeLasted + ` seconds, 
+    and had ` + player.timeLeft + ` seconds left!
     collected ` + player.wallet[1] + ` special coins
     collected ` + player.wallet[0] + ` normal coins
     won ` + endFlag.winTotal + ` time(s), and
-    won ` + endFlag.winsRow + ` time(s) in a row`;
-
-    //      you had` + player.timeLeft `seconds left!
+    won ` + endFlag.winsRow + " time(s) in a row";
 
     //  Draw screen
     screenHolder.draw();
     detectMouseImputs();
   }
-  
 }
+
 
 function mousePressed(){
   if(!wind.isPlaying()){
@@ -1012,7 +1013,7 @@ function createHP(){
 }
 
 function createCollectibles(){
-  for (theSprites of collectibles){
+  for (let theSprites of collectibles){
     theSprites.remove();
   }
 
