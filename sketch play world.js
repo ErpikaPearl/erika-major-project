@@ -30,7 +30,7 @@ let cameraMovement = 50;
 let wallWidth = 50;
 let totalCoins = 0;
 let totalBigCoins = 6;
-let timeLimit = 120;
+let timeLimit = 300;
 let gameStart = 0;
 
 
@@ -712,7 +712,6 @@ function draw() {
     collectibles.visible = false;
     infoText.visible = false;
     endFlag.visible = false;
-    buttons.collider = "static";
 
     //  Update text
     titleText.text = " YOU DIED.";
@@ -772,7 +771,8 @@ function mousePressed(){
 
 function keyPressed(){
   //  Player Movements
-  if (keyCode === 32){  //  (SPACE) Jump
+  if (keyCode === 32){  //  (SPACE)
+    //  If player is on ground, use main jump. If not, use double jump
     if (player.isOnGround){
       jump.play();
       player.applyForceScaled(0, -400);      
@@ -784,9 +784,9 @@ function keyPressed(){
     }
   }
   
-  if (keyCode === 16 && player.dash){  //  (SHIFT) Dash in the direction player is facing
+  if (keyCode === 16 && player.dash){  //  (SHIFT) 
     let waitTime = 1000;
-    
+    //  Dash in the direction player is facing, but only when cooldown allows
     if (millis() > waitTime + player.lastSwitchedDash){
       jetPack0.play();
       if (player.bearing === 360){
@@ -801,14 +801,14 @@ function keyPressed(){
 }
 
 function detectPlayerImput(){
-  //  Player Movements
+  //  Player Movement left and right
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -player.maxSpeed){  //  A (LEFT)
     player.bearing = 180;
     if (player.isOnGround){
       player.applyForceScaled(-50, 0);
       walkSound();
     }
-    else{
+    else{ //  Allows for player to move slightly when in the air
       player.applyForceScaled(-5, 0);
     }
   }
@@ -832,32 +832,35 @@ function detectPlayerImput(){
 }
 
 function managePlayerStates(){
+  //  Evaluates and changes the states of the player depending on whats happening
   player.isOnGround = false;
-  for (let i = 0; i < solidsGroup.length; i++){
-    if (player.colliding(solidsGroup[i])){  //  If touching any ground object
+  for (let i = 0; i < solidsGroup.length; i++){ //  If touching any ground object
+    if (player.colliding(solidsGroup[i])){  
       player.doubleJump = true;
       player.isOnGround = true;
     }
   }
   for (let lazer of lazers){
-    if (player.colliding(lazer) && player.invulnerable === false){  //  If touching any lazer and the player can take damage
+    if (player.colliding(lazer) && player.invulnerable === false){  //  If touching lasers take damage
       player.hp--;
       player.hpHolder[player.hp].remove();
       player.lastHurt = millis();
       player.gotHurt = true;
     }
   }
-  if (player.hp === 0 || floor(millis()/1000 - gameStart) > timeLimit || player.y > lvlOneBase.y + lvlOneBase.height/2){
-    levelState = "deathScreen";
+  if (player.hp === 0 || floor(millis()/1000 - gameStart) > timeLimit || player.y > lvlOneBase.y + lvlOneBase.height/2){  //  If player dies
     screenHolder.visible = true;
     infoText.visible = false;    
     dropdownInfo.visible = false;
     endFlag.winsRow = 0;
     player.timeLasted = floor(millis()/1000 - gameStart);
+    buttons.collider = "static";
+    levelState = "deathScreen";
   }
 }
 
 function deathCoolDown(){
+  //  Makes the player invulnerable for 1000ms after getting hurt
   let waitTime = 1000;
   if (player.gotHurt){
     player.invulnerable = true;
@@ -870,19 +873,8 @@ function deathCoolDown(){
   }
 }
 
-function walkSound(){
-  let played = 0;
-  if (played === 0 && !footStep0.isPlaying()){
-    footStep0.play();
-    played = 1;
-    if (played === 1 && !footStep1.isPlaying()){
-      footStep1.play();
-      played = 2;
-    }
-  }
-}
-
 function collectItems(player, itemSpirte){
+  //  Puts the coin in the player's wallet then removes it
   if (itemSpirte.special === true){
     player.wallet[1] = player.wallet[1] + 1;
   }
@@ -893,20 +885,22 @@ function collectItems(player, itemSpirte){
 }
 
 function checkWallet(){
+  //  If the player has all big coins, play win message and activate flag.
   if (player.wallet[1] === totalBigCoins){
     endFlag.color = "green";
     endFlag.win = true;
     titleText.text = `You've collected all the big coins!
     make your way back to the start to win.`;
-    titleText.visible = true;
+    buttons.collider = "static";
   }
   else {
-    titleText.visible = false;
+    titleText.text = "";
     endFlag.color = "red";
   }
 }
 
 function detectWin() {
+  //  If win conditions are met set up and switch to win screen
   if (endFlag.win){
     endFlag.winTotal ++;
     endFlag.winsRow ++;
@@ -920,46 +914,44 @@ function detectWin() {
 }
 
 function resetGame(){
+  //  Sets up all variables so that the game can start
   player.wallet = [0,0];
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
   player.x = lvlOneBackground.width/2 - wallWidth*5;
   player.invulnerable = false;
-
   gameStart = millis()/1000;
-  // lazers.lastSwitched = millis();
   endFlag.win = false;
-
   createCollectibles();
   createHP();
 }
 
 function lazerFlash(lazerThing){
+  //  Makes the lazers flash in whatever interval
   if (millis() > lazerThing.interval + lazerThing.lastSwitched){
     // lazerThing.visible = !lazerThing.visible;
     lazerThing.isSolid = ! lazerThing.isSolid;
     if (lazerThing.isSolid){
       lazerThing.collider = "static";
       lazerThing.color = "blue";
-
     }
     else{
       lazerThing.collider = "none";
       lazerThing.color = "lightblue";
-
     }
     lazerThing.lastSwitched = millis();
   }
 }
 
 function detectMouseImputs(){
+  //  Detects when the mouse is hovering over butttons
   if (begin.mouse.hovering() || godMode.mouse.hovering() || dropdown.mouse.hovering()){
-    if (begin.mouse.hovering()){
+    if (begin.mouse.hovering()){  //  Highlight begin game button
       infoText.text = "Begin the game.";
       begin.color = "red";
       infoText.visible = true;
       detectMouseClick(begin);
     }
-    else if (godMode.mouse.hovering()){
+    else if (godMode.mouse.hovering()){ //   Highlight God mode button
       infoText.text = `Begin the game but 
       in god mode. While in god mode, you 
       can't die.`;
@@ -967,21 +959,22 @@ function detectMouseImputs(){
       infoText.visible = true;
       detectMouseClick(godMode);
     }
-    else if (millis() > dropdown.lastSwitched + dropdown.waitTime){
+    else if (millis() > dropdown.lastSwitched + dropdown.waitTime){ //  Highlight dropdown button
       dropdown.color = "Red";
       detectMouseClick(dropdown);
     }
+    //  move info text to mouse
     infoText.x = mouse.x + infoText.width/2;
     infoText.y = mouse.y - infoText.height/2;
   }
-  else{
+  else {
     infoText.visible = false;
     buttons.color = "darkred";
   }
 }
 
 function detectMouseClick(buttonThing){
-
+  //  Either starts the game or shows the dropdown 
   if (buttonThing.mouse.pressing()){
     if (buttonThing === dropdown){
       dropdownInfo.visible = !dropdownInfo.visible;
@@ -998,11 +991,13 @@ function detectMouseClick(buttonThing){
 }
 
 function createHP(){
+  //  Removes the hp from the previous game and then makes new ones
   for (let theSprites of player.hpHolder){
     theSprites.remove();
   }
   player.hp = 5;
   player.hpHolder = [];
+  
   for (let hp = 0; hp < player.hp; hp++){
     heart = new HUD.Sprite();
     heart.radius = 20;
@@ -1013,10 +1008,12 @@ function createHP(){
 }
 
 function createCollectibles(){
+  //  Removes the coins from the previous game and then makes new ones
+
+  //  Create special coins in specific spots 
   for (let theSprites of collectibles){
     theSprites.remove();
   }
-
   let bigCoin1 = new collectibles.Sprite();
   bigCoin1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5;
   bigCoin1.x = -lvlOneBackground.width/2 + wallWidth*3;
@@ -1036,12 +1033,14 @@ function createCollectibles(){
   bigCoin6.y = lvlOneFloorBottom.y - wallWidth*2;
   bigCoin6.x = -lvlOneBackground.width/2 + wallWidth*2;
 
+  //  Set amount of coins per floor
   let floor0 = 6;
   let floor1 = 4;
   let floor2 = 6;
   let floor3 = 4;
   let floor4 = 6;
   totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
+  //  Draw coins randomly on each floor
   for (let i = 0; i < totalCoins; i++){
     let coin = new collectibles.Sprite();
     coin.color = "yellow";
@@ -1069,5 +1068,19 @@ function createCollectibles(){
     }
     coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
   }
+  //  Uncomment the below line of code to put them all at the top of the level
   // collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
+}
+
+function walkSound(){
+  //  Plays the two footstep sounds consecutively
+  let played = 0;
+  if (played === 0 && !footStep0.isPlaying()){
+    footStep0.play();
+    played = 1;
+    if (played === 1 && !footStep1.isPlaying()){
+      footStep1.play();
+      played = 2;
+    }
+  }
 }
