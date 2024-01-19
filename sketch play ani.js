@@ -66,7 +66,7 @@ function setup() {
   player.lastSwitchedDash = 0;
   player.isOnGround = false;
   player.wallet = [0, 0];
-  player.addAni("run", runAni, 8)
+  player.addAni("run", runAni, 8);
   player.anis.scale = 0.15;
   player.anis.frameDelay = 5;
 
@@ -680,10 +680,10 @@ function managePlayerStates(){
   }
   if (!player.isOnGround ){ //& player.ani.name !== "jump"
     if (player.vel.y < -3){
-      console.log("fly up")
+      console.log("fly up");
     }
     else if (player.vel.y > 3){
-      console.log("fly down")
+      console.log("fly down");
     }
   }
 

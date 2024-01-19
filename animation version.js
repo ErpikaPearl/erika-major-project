@@ -20,6 +20,7 @@ let begin, godMode, dropdown;  // Children of butons
 let infoText, dropdownInfo;  //  Children of floatText
 let coinsInfo, healthInfo, timeInfo, mainRules; // Children of dropdownInfo
 let footStep0, footStep1, jump, jetPack0, wind; //  Sound files
+let runAni;
 
 //  Declaring world and camera variables
 let levelState = "startScreen";
@@ -39,12 +40,14 @@ function preload(){
   jump = loadSound("Assets/jump.wav");
   jetPack0 = loadSound("Assets/jetpack0.wav");
   wind = loadSound("Assets/wind.wav");
-  //  Set sounds volu,e
+  //  Set sounds volume
   footStep0.setVolume(0.1);
   footStep1.setVolume(0.08);
   jump.setVolume(1);
   jetPack0.setVolume(0.2);
   wind.setVolume(1);
+
+  runAni = loadAni("Assets/Running/frame_00001.png", 8);
 }
 
 function setup() {
@@ -58,8 +61,8 @@ function setup() {
 
   //  Set up player
   player = new Sprite();
-  player.width = 50;
-  player.height = 80;
+  player.width = 60;
+  player.height = 90;
   player.mass = 70;
   player.collider = "dynamic";
   player.color = "red";
@@ -78,6 +81,10 @@ function setup() {
   player.dash = true;
   player.lastSwitchedDash = 0;
   player.isOnGround = false;
+  player.addAni("run", runAni, 8);
+  player.ani.scale = 0.15;
+  // player.ani.scale.y = 1;
+  player.ani.frameDelay = 5;
 
   //  Set up HUD
   HUD = new Group();
@@ -123,7 +130,7 @@ function setup() {
   
   levelOne = new Group(); //  Holds all walls, platforms, and floors 
   levelOne.collider = "static";
-  levelOne.color = "green";
+  levelOne.color = color(90, 80, 80);
   levelOne.visible = false;
   levelOne.stroke = levelOne.color;
   levelOne.friction = 4;
@@ -136,7 +143,7 @@ function setup() {
   lvlOneBackground.width = 7000;
   lvlOneBackground.height = 2000;
   lvlOneBackground.collider = "n";
-  lvlOneBackground.color = "orange";
+  lvlOneBackground.color = color(140, 120, 130);
   lvlOneBackground.visible = false;
 
   lvlOneBase = new levelOne.Sprite(); //  The green base below the level
@@ -419,7 +426,7 @@ function setup() {
   lazers.x = windowWidth/2;
   lazers.thickness  = 20;
   lazers.collider = "static";
-  lazers.color = "blue";
+  lazers.color = color(90, 180, 100);
   lazers.isSolid = true;
   lazers.visible = false;
   lazers.lastSwitched = 0;
@@ -665,6 +672,7 @@ function draw() {
     endFlag.draw();
 
     //  Do visual functions
+    player.debug = mouse.pressing();
     player.overlaps(collectibles, collectItems);
     player.overlaps(endFlag, detectWin);
     deathCoolDown(millis());
@@ -765,10 +773,12 @@ function keyPressed(){
     //  If player is on ground, use main jump. If not, use double jump
     if (player.isOnGround){
       jump.play();
+      console.log("jump start");
       player.applyForceScaled(0, -400);      
     }
     else if (player.doubleJump && !player.isOnGround){
       jetPack0.play();
+      console.log("jump start");
       player.applyForceScaled(0, -300);
       player.doubleJump = false;
     }
@@ -781,12 +791,23 @@ function keyPressed(){
       jetPack0.play();
       if (player.bearing === 360){
         player.applyForceScaled(800, 0);
+        console.log("dash");
       }
       else if (player.bearing === 180){
         player.applyForceScaled(-800, 0);
+        console.log("dash");
+
       }
       player.lastSwitchedDash = millis();
     }
+  }
+
+  //  Animation controll
+  if (keyCode === 65 || keyCode === LEFT_ARROW){
+    player.mirror.x = true;
+  }
+  else if (keyCode === 68 || keyCode === RIGHT_ARROW){
+    player.mirror.x = false;
   }
 }
 
@@ -796,6 +817,7 @@ function detectPlayerImput(){
     player.bearing = 180;
     if (player.isOnGround){
       player.applyForceScaled(-50, 0);
+      player.changeAni(runAni);
       walkSound();
     }
     //  Allows for player to move slightly when in the air
@@ -808,6 +830,7 @@ function detectPlayerImput(){
     player.bearing = 360;
     if (player.isOnGround){
       player.applyForceScaled(50, 0);
+      player.changeAni(runAni);
       walkSound();
     }
     else{
@@ -850,6 +873,19 @@ function managePlayerStates(){
     player.timeLasted = floor(millis()/1000 - gameStart);
     buttons.collider = "static";
     levelState = "deathScreen";
+  }
+
+  //  Animation Controll
+  if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
+    console.log("stand");
+  }
+  if (!player.isOnGround ){ //& player.ani.name !== "jump"
+    if (player.vel.y < -3){
+      console.log("fly up");
+    }
+    else if (player.vel.y > 3){
+      console.log("fly down");
+    }
   }
 }
 
@@ -930,11 +966,11 @@ function lazerFlash(lazerThing){
     lazerThing.isSolid = ! lazerThing.isSolid;
     if (lazerThing.isSolid){
       lazerThing.collider = "static";
-      lazerThing.color = "blue";
+      lazerThing.color = color(100, 160, 110);
     }
     else{
       lazerThing.collider = "none";
-      lazerThing.color = "lightblue";
+      lazerThing.color = color(186, 227, 176, 150);
     }
     lazerThing.lastSwitched = millis();
   }
