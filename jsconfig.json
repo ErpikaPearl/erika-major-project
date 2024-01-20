@@ -3,5 +3,5 @@
     "*.js",
     "libraries/*.js",
     "c:\\Users\\Erika\\.vscode\\extensions\\wmcicompsci.cs30-p5-1.7.2\\p5types\\global.d.ts"
-  ]
+, "other sketch files/test collision.js", "other sketch files/test friction.js", "other sketch files/test.js", "other sketch files/sketch play ani.js", "other sketch files/sketch play debug.js", "other sketch files/sketch play world.js", "other sketch files/sketch play.js", "other sketch files/sketch.js", "other sketch files/start screen.js", "other sketch files/death screen.js", "other sketch files/different walks.js"  ]
 }

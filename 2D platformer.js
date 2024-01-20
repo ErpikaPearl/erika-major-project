@@ -1,18 +1,28 @@
-// Project Title
-// Your Name
-// Date
-//
-// Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+/*==========================================================================
+*  22/01/2024
+*
+*  Project: 2D platformer
+*  Creator: Erika Johnson
+*  Teacher: Mr. Schellenburg
+*  
+*  Purpose: This project is a 2D playformer made using p5play. It includes 
+*  collectibles(coins) and environmental danger(lasers). The game also keeps
+*  track of stats from the previous attempt and shows it in a win or lose
+*  screen. Sound effects and background music are included as well.
+*
+*  Note to Mr. Schellenberg: This project includes animations. Because of 
+*  issues with drawing the character, the hitbox of the character is a 
+*  little off. If you would like to see the character just as a box for
+*  whatever reason, please turn the below variable "animationOn" to false.
+*=========================================================================*/
 
-//  Declaring Variables
+let animationOn = true;
 
-//  Declaring sprites, assets and groups (Those defined in the same line relate to similar things)
+//  Declaring sprites, assets and groups
 let player;
 let lazers;
 let endFlag;
 let solidsGroup = [];
-let coinsGroup = [];
 let HUD, coinCount, timerCount, BigCoinCount, heart;  //  HUD and children
 let lvlOneBackground, levelOne, collectibles, lvlOneBase, bricks; //  spites used to construct level one
 let lvlOnePlaformFifthLeftmost, lvlOnePlaformThirdLeft, lvlOneFloorThirdLeft, lvlOneFloorSecond, lvlOneFloorBottom, lvlOneFloorFirstLeft, lvlOneFloorFourthLeft;  //  Platforms that need to be global
@@ -20,8 +30,8 @@ let screenHolder, titleText, buttons, floatText; // screenholder and children
 let begin, godMode, dropdown;  // Children of butons
 let infoText, dropdownInfo;  //  Children of floatText
 let coinsInfo, healthInfo, timeInfo, mainRules; // Children of dropdownInfo
-let footStep0, footStep1, jump, jetPack0, wind; //  Sound files
-let runAni;
+let footStep0, footStep1, jump, jetPack0, wind, youLose, youWin, timeSound, painOne, painTwo, collectCoin, collectBigCoin; //  Sound files
+let runAni, landAni, jumpAni, standAni, flyUpAni, flyMidAni, flyDownAni, lightBrick; // Animations and images
 
 //  Declaring world and camera variables
 let levelState = "startScreen";
@@ -34,33 +44,38 @@ let gameStart = 0;
 let animationScale = 0.15;
 let colourMap = new Map();
 
-
 //  Load in assets
 function preload(){
   //  Load in sounds
-  footStep0 = loadSound("Assets/footstep00.ogg");
-  footStep1 = loadSound("Assets/footstep01.ogg");
-  jump = loadSound("Assets/jump.wav");
-  jetPack0 = loadSound("Assets/jetpack0.wav");
-  wind = loadSound("Assets/wind.wav");
+  footStep0 = loadSound("Assets/Sounds/footstep00.ogg");
+  footStep1 = loadSound("Assets/Sounds/footstep01.ogg");
+  jump = loadSound("Assets/Sounds/jump.wav");
+  jetPack0 = loadSound("Assets/Sounds/jetpack0.wav");
+  wind = loadSound("Assets/Sounds/wind.wav");
+  youLose = loadSound("Assets/Sounds/you_lose.ogg");
+  youWin = loadSound("Assets/Sounds/you_win.ogg");
+  timeSound = loadSound("Assets/Sounds/time.ogg");
+  painOne = loadSound("Assets/Sounds/Pain1.ogg");
+  painTwo = loadSound("Assets/Sounds/Pain2.ogg");
+  collectCoin = loadSound("Assets/Sounds/coinsplash.ogg");
+  collectBigCoin = loadSound("Assets/Sounds/Picked Coin.wav");
+
   //  Set sounds volume
   footStep0.setVolume(0.1);
   footStep1.setVolume(0.08);
-  jump.setVolume(1);
   jetPack0.setVolume(0.2);
-  wind.setVolume(1);
+  collectBigCoin.setVolume(0.4);
+  painOne.setVolume(0.3);
+  painTwo.setVolume(0.3);
 
   //  Load in animations
-  runAni = loadAni("Assets/Running/frame_00001.png", 8);
-  landAni = loadAni('Assets/Land/frame_00001.png', 4);
-  jumpAni = loadAni('Assets/Jump/frame_00001.png', 4);
-  standAni = loadAni('Assets/Stand/frame_00001.png', 1);
-  flyUpAni = loadAni('Assets/Fly Up/frame_00001.png', 1);
-  flyDownAni = loadAni('Assets/Fly down/frame_00001.png', 1);
-  flyMidAni = loadAni('Assets/Fly Mid/frame_00001.png', 1);
-  // bigCoinAni = loadAni('Assets/Big Coin/frame_00001.png', 16);
-  coinAni = loadAni('Assets/Coin/frame_00001.png', 16);
-
+  runAni = loadAni("Assets/Animations/Running/frame_00001.png", 8);
+  landAni = loadAni("Assets/Animations/Land/frame_00001.png", 4);
+  jumpAni = loadAni("Assets/Animations/Jump/frame_00001.png", 4);
+  standAni = loadAni("Assets/Animations/Stand/frame_00001.png", 1);
+  flyUpAni = loadAni("Assets/Animations/Fly Up/frame_00001.png", 1);
+  flyDownAni = loadAni("Assets/Animations/Fly down/frame_00001.png", 1);
+  flyMidAni = loadAni("Assets/Animations/Fly Mid/frame_00001.png", 1);
 
   //  Set delays and scale
   runAni.scale = animationScale;
@@ -70,14 +85,12 @@ function preload(){
   flyUpAni.scale = animationScale;
   flyDownAni.scale = animationScale;
   flyMidAni.scale = animationScale;
-  coinAni.scale = .00000000000000000000000001;
   runAni.frameDelay = 8;
   jumpAni.frameDelay = 6;
   landAni.frameDelay = 6;
-  coinAni.frameDelay = 8;
 
   //  Load images
-  lightBrick = loadImage('assets/Bricks/Brick light.png');
+  lightBrick = loadImage("assets/Bricks/Brick light.png");
 }
 
 function setup() {
@@ -107,6 +120,7 @@ function setup() {
   player.mass = 70;
   player.collider = "dynamic";
   player.visible = false;
+  player.color = colourMap.get("darkRed");
   player.rotationLock = true;
   player.bounciness = 0;
   player.hp = 5;
@@ -122,14 +136,16 @@ function setup() {
   player.lastSwitchedDash = 0;
   player.isOnGround = false;
   player.isWalking = false;
-  player.addAni("run", runAni, 8);
-  player.addAni("land", landAni, 8);
-  player.addAni("jump", jumpAni, 8);
-  player.addAni("stand", standAni, 1);
-  player.addAni("fly up", flyUpAni, 1);
-  player.addAni("fly mid", flyMidAni, 1);
-  player.addAni("fly down", flyDownAni, 1);
-
+  if (animationOn){
+    player.addAni("run", runAni, 8);
+    player.addAni("land", landAni, 8);
+    player.addAni("jump", jumpAni, 8);
+    player.addAni("stand", standAni, 1);
+    player.addAni("fly up", flyUpAni, 1);
+    player.addAni("fly mid", flyMidAni, 1);
+    player.addAni("fly down", flyDownAni, 1);
+  }
+  
   //  Set up HUD
   HUD = new Group();
   HUD.y = 50;
@@ -188,7 +204,7 @@ function setup() {
   lvlOneBackground.width = 7000;
   lvlOneBackground.height = 2000;
   lvlOneBackground.collider = "n";
-  lvlOneBackground.color = colourMap.get("lightGrey")
+  lvlOneBackground.color = colourMap.get("lightGrey");
   lvlOneBackground.visible = false;
 
   lvlOneBase = new levelOne.Sprite(); //  The green base below the level
@@ -700,7 +716,6 @@ function setup() {
 }
 
 function draw() {
-  // clear();
   background(color(205, 244, 237));
 
   //  Always let the lazers flash so they keep at the same interval
@@ -733,7 +748,6 @@ function draw() {
 
     //  Do visual functions
     manageAnimations();
-    player.debug = mouse.pressing();
     player.overlaps(collectibles, collectItems);
     player.overlaps(endFlag, detectWin);
     deathCoolDown(millis());
@@ -839,7 +853,9 @@ function keyPressed(){
     }
     else if (player.doubleJump && !player.isOnGround){
       jetPack0.play();
-      player.changeAni(["jump", "fly up"]);
+      if (animationOn){
+        player.changeAni(["jump", "fly up"]);
+      }
       player.applyForceScaled(0, -300);
       player.doubleJump = false;
     }
@@ -924,6 +940,13 @@ function managePlayerStates(){
       player.hpHolder[player.hp].remove();
       player.lastHurt = millis();
       player.gotHurt = true;
+      //  Randomly plays a pain sound
+      if (random(0, 100) >= 50){
+        painOne.play();
+      }
+      else{
+        painTwo.play();
+      }
     }
   }
   //  If player dies, start death screen and end game
@@ -935,41 +958,50 @@ function managePlayerStates(){
     player.timeLasted = floor(millis()/1000 - gameStart);
     buttons.collider = "static";
     levelState = "deathScreen";
+    //  If you ran out of time, say time. Otherwise say you lose
+    if (floor(millis()/1000 - gameStart) > timeLimit){
+      timeSound.play();
+    }
+    else{
+      youLose.play();
+    }
   }
 }
 
 function manageAnimations(){
-//  Controlls animations
-
-  //  Player landing and jumping
-  for (let solid of solidsGroup){
-    if (player.collided(solid)){
-      if (player.ani.name === "fly down"){
-        player.changeAni(["land", "run"]);
-      }
-      else {
-        player.changeAni(["jump", "fly up"]);
+//  Controlls animations if enabled
+  if (animationOn){
+    //  Player landing and jumping
+    for (let solid of solidsGroup){
+      if (player.collided(solid)){
+        if (player.ani.name === "fly down"){
+          player.changeAni(["land", "run"]);
+          footStep1.play();
+        }
+        else {
+          player.changeAni(["jump", "fly up"]);
+        }
       }
     }
+    //  The rest of the player movements
+    if (player.ani.name !== "land" && player.ani.name !== "jump"){
+      if (player.isWalking && player.isOnGround){
+        player.changeAni("run");
+
+      }
+      else if (!player.isOnGround){
+        if (player.vel.y < -3){
+          player.changeAni(["fly up", "fly mid"]);
+        }
+        else if (player.vel.y > 3){
+          player.changeAni("fly down");
+        }
+      }
+      else if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
+        player.changeAni("stand");
+      }
+    }  
   }
-  //  The rest of the player movements
-  if (player.ani.name !== "land" && player.ani.name !== "jump"){
-    if (player.isWalking && player.isOnGround){
-      player.changeAni("run");
-
-    }
-    else if (!player.isOnGround){
-      if (player.vel.y < -3){
-        player.changeAni(["fly up", "fly mid"]);
-      }
-      else if (player.vel.y > 3){
-        player.changeAni("fly down");
-      }
-    }
-    else if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
-      player.changeAni("stand");
-    }
-  }  
 }
 
 function deathCoolDown(){
@@ -978,9 +1010,11 @@ function deathCoolDown(){
     let waitTime = 1000;
     if (player.gotHurt){
       player.invulnerable = true;
+      player.color = colourMap.get("red");
       if (millis() > waitTime + player.lastHurt){
         player.invulnerable = false;
         player.gotHurt = false;
+        player.color = colourMap.get("darkRed");
       }
     }
   }
@@ -993,9 +1027,11 @@ function collectItems(player, itemSpirte){
   //  Puts the coin in the player's wallet then removes it
   if (itemSpirte.special === true){
     player.wallet[1] = player.wallet[1] + 1;
+    collectBigCoin.play();
   }
   else {
     player.wallet[0] = player.wallet[0] + 1;
+    collectCoin.play();
   }
   itemSpirte.remove();
 }
@@ -1015,6 +1051,7 @@ function checkWallet(){
   }
 }
 
+
 function detectWin() {
   //  If win conditions are met set up and switch to win screen
   if (endFlag.win){
@@ -1026,6 +1063,7 @@ function detectWin() {
     dropdownInfo.visible = false;
     player.timeLasted = floor(millis()/1000 - gameStart);
     levelState = "winScreen";
+    youWin.play();
   }
 }
 
@@ -1158,10 +1196,10 @@ function createCollectibles(){
   totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
   //  Draw coins randomly on each floor
   for (let i = 0; i < totalCoins; i++){
-    coin = new collectibles.Sprite();
+    let coin = new collectibles.Sprite();
     coin.color = colourMap.get("yellow");
     coin.diameter = wallWidth;
-    coin.text = "1"
+    coin.text = "1";
     coin.special = false;
     if (floor0 > 0){
       coin.y = lvlOneFloorBottom.y - wallWidth*2;
@@ -1184,9 +1222,8 @@ function createCollectibles(){
       floor4 --;
     }
     coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
-    coinsGroup.push(coin);
   }
-  //  Uncomment the below line of code to put them all at the top of the level
+  //  Uncomment the below line of code to put the coins at the top of the level
   // collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
 }
 
