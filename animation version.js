@@ -13,7 +13,7 @@ let lazers;
 let endFlag;
 let solidsGroup = [];
 let HUD, coinCount, timerCount, BigCoinCount, heart;  //  HUD and children
-let lvlOneBackground, levelOne, collectibles, lvlOneBase; //  spites used to construct level one
+let lvlOneBackground, levelOne, collectibles, lvlOneBase, bricks; //  spites used to construct level one
 let lvlOnePlaformFifthLeftmost, lvlOnePlaformThirdLeft, lvlOneFloorThirdLeft, lvlOneFloorSecond, lvlOneFloorBottom, lvlOneFloorFirstLeft, lvlOneFloorFourthLeft;  //  Platforms that need to be global
 let screenHolder, titleText, buttons, floatText; // screenholder and children
 let begin, godMode, dropdown;  // Children of butons
@@ -30,6 +30,8 @@ let totalCoins = 0;
 let totalBigCoins = 6;
 let timeLimit = 300;
 let gameStart = 0;
+let animationScale = 0.15;
+let colourMap = new Map();
 
 
 //  Load in assets
@@ -47,17 +49,46 @@ function preload(){
   jetPack0.setVolume(0.2);
   wind.setVolume(1);
 
+  //  Load in animations
   runAni = loadAni("Assets/Running/frame_00001.png", 8);
+  landAni = loadAni('Assets/Land/frame_00001.png', 4);
+  jumpAni = loadAni('Assets/Jump/frame_00001.png', 4);
+  standAni = loadAni('Assets/Stand/frame_00001.png', 1);
+  flyUpAni = loadAni('Assets/Fly Up/frame_00001.png', 1);
+  flyDownAni = loadAni('Assets/Fly down/frame_00001.png', 1);
+  flyMidAni = loadAni('Assets/Fly Mid/frame_00001.png', 1);
+  //  Set delays and scale
+  runAni.scale = animationScale;
+  jumpAni.scale = animationScale;
+  landAni.scale = animationScale;
+  standAni.scale = animationScale;
+  flyUpAni.scale = animationScale;
+  flyDownAni.scale = animationScale;
+  flyMidAni.scale = animationScale;
+  runAni.frameDelay = 8;
+  jumpAni.frameDelay = 6;
+  landAni.frameDelay = 6;
+
+  //  Load images
+  lightBrick = loadImage('assets/Bricks/Brick light.png');
 }
 
 function setup() {
   //  Set up world
-  new Canvas(1278, 710); //   new Canvas(windowwidth, windowheight);
+  new Canvas(1278, 710);
   angleMode(DEGREES);
   rectMode(CENTER);
   world.gravity.y = 9.8;
   allSprites.autoCull = false;  //  Prevents sprites from dissapearing when too far away from the camera
   camera.zoom = 0.9;
+
+  // define colours that can be used
+  colourMap.set("darkGrey", color(90, 80, 80));
+  colourMap.set("lightGrey", color(140, 120, 130));
+  colourMap.set("lightGreen", color(186, 227, 176, 150));
+  colourMap.set("green", color(100, 160, 110));
+  colourMap.set("red", color(176, 37, 7));
+  colourMap.set("darkRed", color(126, 22, 0));
 
   //  Set up player
   player = new Sprite();
@@ -65,7 +96,6 @@ function setup() {
   player.height = 90;
   player.mass = 70;
   player.collider = "dynamic";
-  player.color = "red";
   player.visible = false;
   player.rotationLock = true;
   player.bounciness = 0;
@@ -81,10 +111,14 @@ function setup() {
   player.dash = true;
   player.lastSwitchedDash = 0;
   player.isOnGround = false;
+  player.isWalking = false;
   player.addAni("run", runAni, 8);
-  player.ani.scale = 0.15;
-  // player.ani.scale.y = 1;
-  player.ani.frameDelay = 5;
+  player.addAni("land", landAni, 8);
+  player.addAni("jump", jumpAni, 8);
+  player.addAni("stand", standAni, 1);
+  player.addAni("fly up", flyUpAni, 1);
+  player.addAni("fly mid", flyMidAni, 1);
+  player.addAni("fly down", flyDownAni, 1);
 
   //  Set up HUD
   HUD = new Group();
@@ -118,7 +152,7 @@ function setup() {
     heart = new HUD.Sprite();
     heart.radius = 20;
     heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
-    heart.color = "red";
+    heart.color = colourMap.get("red");
     player.hpHolder.push(heart);
   }
 
@@ -130,7 +164,7 @@ function setup() {
   
   levelOne = new Group(); //  Holds all walls, platforms, and floors 
   levelOne.collider = "static";
-  levelOne.color = color(90, 80, 80);
+  levelOne.color = colourMap.get("darkGrey");
   levelOne.visible = false;
   levelOne.stroke = levelOne.color;
   levelOne.friction = 4;
@@ -143,7 +177,7 @@ function setup() {
   lvlOneBackground.width = 7000;
   lvlOneBackground.height = 2000;
   lvlOneBackground.collider = "n";
-  lvlOneBackground.color = color(140, 120, 130);
+  lvlOneBackground.color = colourMap.get("lightGrey")
   lvlOneBackground.visible = false;
 
   lvlOneBase = new levelOne.Sprite(); //  The green base below the level
@@ -151,8 +185,20 @@ function setup() {
   lvlOneBase.y = lvlOneBackground.y + lvlOneBackground.height - 2;
   lvlOneBase.width = lvlOneBackground.width + wallWidth;
   lvlOneBase.height = 2000;
-  lvlOneBase.collider = "n";
-  lvlOneBase.color = "green";  
+  lvlOneBase.collider = "s";
+  lvlOneBase.color = colourMap.get("darkGrey");
+
+  //  Randomly create bricks on background
+  bricks = new Group();
+  bricks.scale = 0.1;
+  bricks.collider = "n";
+  bricks.visible = false;
+  for (let i = 0; i < 300; i++){
+    let singleBrick = new bricks.Sprite();
+    singleBrick.x = random(lvlOneBackground.x - lvlOneBackground.width/2, lvlOneBackground.x + lvlOneBackground.width/2);
+    singleBrick.y = random(lvlOneBackground.y - lvlOneBackground.height/2, lvlOneBackground.y + lvlOneBackground.height/2);
+    singleBrick.img = lightBrick;
+  }
   
   //  Create walls and floors
   let lvlOneLeftWall = new levelOne.Sprite();
@@ -406,7 +452,7 @@ function setup() {
   endFlag.x = player.x;
   endFlag.y = lvlOneFloorFifthLeft.y - lvlOneFloorFifthLeft.height/2 - endFlag.height/2;
   endFlag.collider = "none";
-  endFlag.color = "red";
+  endFlag.color = colourMap.get("red");
   endFlag.visible = false;
   endFlag.winTotal = 0;
   endFlag.winsRow = 0;
@@ -426,7 +472,7 @@ function setup() {
   lazers.x = windowWidth/2;
   lazers.thickness  = 20;
   lazers.collider = "static";
-  lazers.color = color(90, 180, 100);
+  lazers.color = colourMap.get("green");
   lazers.isSolid = true;
   lazers.visible = false;
   lazers.lastSwitched = 0;
@@ -542,7 +588,7 @@ function setup() {
   backgroundBox.height = canvas.h;
   backgroundBox.x = canvas.w/2;
   backgroundBox.y = canvas.h/2;
-  backgroundBox.color = "grey";
+  backgroundBox.color = colourMap.get("lightGrey");
 
   titleText = new screenHolder.Sprite();
   titleText.width = 0;
@@ -551,13 +597,13 @@ function setup() {
   titleText.y = canvas.h/5;
   titleText.textSize = 60;
   titleText.text = "  THE GAME.";
-  titleText.textColor = "darkred";
+  titleText.textColor = colourMap.get("darkRed");
 
   buttons = new screenHolder.Group();
   buttons.width = wallWidth*5;
   buttons.height = wallWidth*3;
   buttons.y = canvas.h - canvas.h/4;
-  buttons.color = "darkred";
+  buttons.color = colourMap.get("darkRed");
   buttons.collider = "static";
   buttons.textSize = 30;
 
@@ -657,7 +703,6 @@ function draw() {
   //  Draw level one
   else if (levelState === "levelOne" || levelState === "godMode"){
     initialiseLevel();
-
     //  Do all detection functions
     managePlayerStates();
     detectPlayerImput();
@@ -666,12 +711,14 @@ function draw() {
     //  Draw every sprite
     camera.on();
     lvlOneBackground.draw();
+    bricks.draw();
     lazers.draw();
     levelOne.draw();
     collectibles.draw();
     endFlag.draw();
 
     //  Do visual functions
+    manageAnimations();
     player.debug = mouse.pressing();
     player.overlaps(collectibles, collectItems);
     player.overlaps(endFlag, detectWin);
@@ -711,6 +758,7 @@ function initialiseLevel(){
   HUD.visible = true;
   collectibles.visible = true;
   endFlag.visible = true;
+  bricks.visible = true;
   screenHolder.visible = false;
   buttons.collider = "none";
 
@@ -730,6 +778,7 @@ function initialiseScreen(){
   collectibles.visible = false;
   infoText.visible = false;
   endFlag.visible = false;  
+  bricks.visible = false;
 
   //  Update text
   if (levelState === "winScreen"){
@@ -773,12 +822,11 @@ function keyPressed(){
     //  If player is on ground, use main jump. If not, use double jump
     if (player.isOnGround){
       jump.play();
-      console.log("jump start");
       player.applyForceScaled(0, -400);      
     }
     else if (player.doubleJump && !player.isOnGround){
       jetPack0.play();
-      console.log("jump start");
+      player.changeAni(["jump", "fly up"]);
       player.applyForceScaled(0, -300);
       player.doubleJump = false;
     }
@@ -817,7 +865,7 @@ function detectPlayerImput(){
     player.bearing = 180;
     if (player.isOnGround){
       player.applyForceScaled(-50, 0);
-      player.changeAni(runAni);
+      player.isWalking = true;
       walkSound();
     }
     //  Allows for player to move slightly when in the air
@@ -830,7 +878,7 @@ function detectPlayerImput(){
     player.bearing = 360;
     if (player.isOnGround){
       player.applyForceScaled(50, 0);
-      player.changeAni(runAni);
+      player.isWalking = true;
       walkSound();
     }
     else{
@@ -844,12 +892,16 @@ function detectPlayerImput(){
   else if(player.vel.x < 0 && player.bearing === 180 && player.isOnGround){
     player.vel.x ++;
   }
+  else{
+    player.isWalking = false;
+  }
 }
 
 function managePlayerStates(){
   //  Evaluates and changes the states of the player depending on whats happening
   player.isOnGround = false;
-  for (let i = 0; i < solidsGroup.length; i++){ //  If touching any ground object
+  //  If touching any ground object set variables to true
+  for (let i = 0; i < solidsGroup.length; i++){ 
     if (player.colliding(solidsGroup[i])){  
       player.doubleJump = true;
       player.isOnGround = true;
@@ -874,19 +926,40 @@ function managePlayerStates(){
     buttons.collider = "static";
     levelState = "deathScreen";
   }
+}
 
-  //  Animation Controll
-  if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
-    console.log("stand");
+function manageAnimations(){
+//  Controlls animations
+
+//  Player landing and jumping
+for (let solid of solidsGroup){
+  if (player.collided(solid)){
+    if (player.ani.name === "fly down"){
+      player.changeAni(["land", "run"]);
+    }
+    else {
+      player.changeAni(["jump", "fly up"]);
+    }
   }
-  if (!player.isOnGround ){ //& player.ani.name !== "jump"
+}
+//  The rest of the player movements
+if (player.ani.name !== "land" && player.ani.name !== "jump"){
+  if (player.isWalking && player.isOnGround){
+    player.changeAni("run");
+
+  }
+  else if (!player.isOnGround){
     if (player.vel.y < -3){
-      console.log("fly up");
+      player.changeAni(["fly up", "fly mid"]);
     }
     else if (player.vel.y > 3){
-      console.log("fly down");
+      player.changeAni("fly down");
     }
   }
+  else if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
+    player.changeAni("stand");
+  }
+}  
 }
 
 function deathCoolDown(){
@@ -922,7 +995,7 @@ function collectItems(player, itemSpirte){
 function checkWallet(){
   //  If the player has all big coins, play win message and activate flag.
   if (player.wallet[1] === totalBigCoins){
-    endFlag.color = "green";
+    endFlag.color = colourMap.get("green");
     endFlag.win = true;
     titleText.text = `You've collected all the big coins!
     make your way back to the start to win.`;
@@ -930,7 +1003,7 @@ function checkWallet(){
   }
   else {
     titleText.text = "";
-    endFlag.color = "red";
+    endFlag.color = colourMap.get("red");
   }
 }
 
@@ -966,11 +1039,11 @@ function lazerFlash(lazerThing){
     lazerThing.isSolid = ! lazerThing.isSolid;
     if (lazerThing.isSolid){
       lazerThing.collider = "static";
-      lazerThing.color = color(100, 160, 110);
+      lazerThing.color = colourMap.get("green");
     }
     else{
       lazerThing.collider = "none";
-      lazerThing.color = color(186, 227, 176, 150);
+      lazerThing.color = colourMap.get("lightGreen");
     }
     lazerThing.lastSwitched = millis();
   }
@@ -982,7 +1055,7 @@ function detectMouseImputs(){
     //  Highlight begin game button
     if (begin.mouse.hovering()){  
       infoText.text = "Begin the game.";
-      begin.color = "red";
+      begin.color = colourMap.get("red");
       infoText.visible = true;
       detectMouseClick(begin);
     }
@@ -991,13 +1064,13 @@ function detectMouseImputs(){
       infoText.text = `Begin the game but 
       in god mode. While in god mode, you 
       can't die.`;
-      godMode.color = "red";
+      godMode.color = colourMap.get("red");
       infoText.visible = true;
       detectMouseClick(godMode);
     }
     //  Highlight dropdown button
     else if (millis() > dropdown.lastSwitched + dropdown.waitTime){ 
-      dropdown.color = "Red";
+      dropdown.color = colourMap.get("red");
       detectMouseClick(dropdown);
     }
     //  move info text to mouse
@@ -1006,7 +1079,7 @@ function detectMouseImputs(){
   }
   else {
     infoText.visible = false;
-    buttons.color = "darkred";
+    buttons.color = colourMap.get("darkRed");
   }
 }
 
@@ -1039,7 +1112,7 @@ function createHP(){
     heart = new HUD.Sprite();
     heart.radius = 20;
     heart.x = coinCount.x + coinCount.width + hp*30 + hp*heart.radius;
-    heart.color = "red";
+    heart.color = colourMap.get("red");
     player.hpHolder.push(heart);
   }
 }

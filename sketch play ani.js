@@ -36,6 +36,12 @@ function preload(){
   wind.setVolume(1);
 
   runAni = loadAni('Assets/Running/frame_00001.png', 8);
+  landAni = loadAni('Assets/Land/frame_00001.png', 4);
+  jumpAni = loadAni('Assets/Jump/frame_00001.png', 4);
+  standAni = loadAni('Assets/Stand/frame_00001.png', 1);
+  flyUpAni = loadAni('Assets/Fly Up/frame_00001.png', 1);
+  flyDownAni = loadAni('Assets/Fly down/frame_00001.png', 1);
+  flyMidAni = loadAni('Assets/Fly Mid/frame_00001.png', 1);
 }
 
 function setup() {
