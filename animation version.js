@@ -12,6 +12,7 @@ let player;
 let lazers;
 let endFlag;
 let solidsGroup = [];
+let coinsGroup = [];
 let HUD, coinCount, timerCount, BigCoinCount, heart;  //  HUD and children
 let lvlOneBackground, levelOne, collectibles, lvlOneBase, bricks; //  spites used to construct level one
 let lvlOnePlaformFifthLeftmost, lvlOnePlaformThirdLeft, lvlOneFloorThirdLeft, lvlOneFloorSecond, lvlOneFloorBottom, lvlOneFloorFirstLeft, lvlOneFloorFourthLeft;  //  Platforms that need to be global
@@ -57,6 +58,10 @@ function preload(){
   flyUpAni = loadAni('Assets/Fly Up/frame_00001.png', 1);
   flyDownAni = loadAni('Assets/Fly down/frame_00001.png', 1);
   flyMidAni = loadAni('Assets/Fly Mid/frame_00001.png', 1);
+  // bigCoinAni = loadAni('Assets/Big Coin/frame_00001.png', 16);
+  coinAni = loadAni('Assets/Coin/frame_00001.png', 16);
+
+
   //  Set delays and scale
   runAni.scale = animationScale;
   jumpAni.scale = animationScale;
@@ -65,9 +70,11 @@ function preload(){
   flyUpAni.scale = animationScale;
   flyDownAni.scale = animationScale;
   flyMidAni.scale = animationScale;
+  coinAni.scale = .00000000000000000000000001;
   runAni.frameDelay = 8;
   jumpAni.frameDelay = 6;
   landAni.frameDelay = 6;
+  coinAni.frameDelay = 8;
 
   //  Load images
   lightBrick = loadImage('assets/Bricks/Brick light.png');
@@ -89,6 +96,9 @@ function setup() {
   colourMap.set("green", color(100, 160, 110));
   colourMap.set("red", color(176, 37, 7));
   colourMap.set("darkRed", color(126, 22, 0));
+  colourMap.set("pink", color(255, 145, 179));
+  colourMap.set("yellow", color(239, 211, 114));
+  colourMap.set("beige", color(254, 249, 235));
 
   //  Set up player
   player = new Sprite();
@@ -124,14 +134,14 @@ function setup() {
   HUD = new Group();
   HUD.y = 50;
   HUD.collider = "none";
-  HUD.color = "white"; 
+  HUD.color = colourMap.get("beige");
   HUD.visible = false;
 
   BigCoinCount = new HUD.Sprite();
   BigCoinCount.x = 50;
   BigCoinCount.width = 60;
   BigCoinCount.height = 60;
-  BigCoinCount.color = "pink";
+  BigCoinCount.color = colourMap.get("pink");
   BigCoinCount.text = player.wallet[0];
   BigCoinCount.textSize = 40;
  
@@ -141,6 +151,7 @@ function setup() {
   coinCount.height = 60;
   coinCount.text = player.wallet[1];
   coinCount.textSize = 40;
+  coinCount.color = colourMap.get("yellow");
 
   timerCount = new HUD.Sprite();
   timerCount.width = 100;
@@ -462,7 +473,9 @@ function setup() {
   collectibles = new Group();
   collectibles.diameter = wallWidth*1.5;
   collectibles.collider = "none";
-  collectibles.color = "pink";
+  collectibles.color = colourMap.get("pink");
+  collectibles.text = "2";
+  collectibles.textSize = 30;
   collectibles.special = true;
   collectibles.visible = false;
 
@@ -631,7 +644,7 @@ function setup() {
   floatText.width = wallWidth*5;
   floatText.height = wallWidth;
   floatText.visible = false;
-  floatText.color = "white";
+  floatText.color = colourMap.get("beige");
 
   infoText = new floatText.Sprite();
 
@@ -657,9 +670,9 @@ function setup() {
   |
   |
   This shows you your coins. The 
-  pink coins are the amount of
+  pink box shows the amount of
   special coins you have, and 
-  the white coins are the amount 
+  the yellow shows the amount 
   of normal coins you have`;
 
   timeInfo = new dropdownInfo.Sprite();
@@ -687,7 +700,8 @@ function setup() {
 }
 
 function draw() {
-  clear();
+  // clear();
+  background(color(205, 244, 237));
 
   //  Always let the lazers flash so they keep at the same interval
   for (let lazer of lazers){
@@ -809,7 +823,6 @@ function initialiseScreen(){
   }
 }
 
-
 function mousePressed(){
   if(!wind.isPlaying()){
     wind.loop();
@@ -839,12 +852,9 @@ function keyPressed(){
       jetPack0.play();
       if (player.bearing === 360){
         player.applyForceScaled(800, 0);
-        console.log("dash");
       }
       else if (player.bearing === 180){
         player.applyForceScaled(-800, 0);
-        console.log("dash");
-
       }
       player.lastSwitchedDash = millis();
     }
@@ -931,35 +941,35 @@ function managePlayerStates(){
 function manageAnimations(){
 //  Controlls animations
 
-//  Player landing and jumping
-for (let solid of solidsGroup){
-  if (player.collided(solid)){
-    if (player.ani.name === "fly down"){
-      player.changeAni(["land", "run"]);
-    }
-    else {
-      player.changeAni(["jump", "fly up"]);
+  //  Player landing and jumping
+  for (let solid of solidsGroup){
+    if (player.collided(solid)){
+      if (player.ani.name === "fly down"){
+        player.changeAni(["land", "run"]);
+      }
+      else {
+        player.changeAni(["jump", "fly up"]);
+      }
     }
   }
-}
-//  The rest of the player movements
-if (player.ani.name !== "land" && player.ani.name !== "jump"){
-  if (player.isWalking && player.isOnGround){
-    player.changeAni("run");
+  //  The rest of the player movements
+  if (player.ani.name !== "land" && player.ani.name !== "jump"){
+    if (player.isWalking && player.isOnGround){
+      player.changeAni("run");
 
-  }
-  else if (!player.isOnGround){
-    if (player.vel.y < -3){
-      player.changeAni(["fly up", "fly mid"]);
     }
-    else if (player.vel.y > 3){
-      player.changeAni("fly down");
+    else if (!player.isOnGround){
+      if (player.vel.y < -3){
+        player.changeAni(["fly up", "fly mid"]);
+      }
+      else if (player.vel.y > 3){
+        player.changeAni("fly down");
+      }
     }
-  }
-  else if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
-    player.changeAni("stand");
-  }
-}  
+    else if (player.vel.x  === 0 && player.vel.y === 0 && player.isOnGround){
+      player.changeAni("stand");
+    }
+  }  
 }
 
 function deathCoolDown(){
@@ -968,11 +978,9 @@ function deathCoolDown(){
     let waitTime = 1000;
     if (player.gotHurt){
       player.invulnerable = true;
-      player.color = "pink";
       if (millis() > waitTime + player.lastHurt){
         player.invulnerable = false;
         player.gotHurt = false;
-        player.color = "red";
       }
     }
   }
@@ -1063,7 +1071,7 @@ function detectMouseImputs(){
     else if (godMode.mouse.hovering()){ 
       infoText.text = `Begin the game but 
       in god mode. While in god mode, you 
-      can't die.`;
+      can't die from lasers.`;
       godMode.color = colourMap.get("red");
       infoText.visible = true;
       detectMouseClick(godMode);
@@ -1150,9 +1158,10 @@ function createCollectibles(){
   totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
   //  Draw coins randomly on each floor
   for (let i = 0; i < totalCoins; i++){
-    let coin = new collectibles.Sprite();
-    coin.color = "yellow";
+    coin = new collectibles.Sprite();
+    coin.color = colourMap.get("yellow");
     coin.diameter = wallWidth;
+    coin.text = "1"
     coin.special = false;
     if (floor0 > 0){
       coin.y = lvlOneFloorBottom.y - wallWidth*2;
@@ -1175,6 +1184,7 @@ function createCollectibles(){
       floor4 --;
     }
     coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
+    coinsGroup.push(coin);
   }
   //  Uncomment the below line of code to put them all at the top of the level
   // collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
