@@ -6,7 +6,7 @@
 *  Teacher: Mr. Schellenburg
 *  
 *  Purpose: This project is a 2D playformer made using p5play. It includes 
-*  collectibles(coins) and environmental danger(lasers). The game also keeps
+*  collectibles (coins) and environmental danger (lasers). The game also keeps
 *  track of stats from the previous attempt and shows it in a win or lose
 *  screen. Sound effects and background music are included as well.
 *
@@ -26,7 +26,7 @@ let solidsGroup = [];
 let HUD, coinCount, timerCount, BigCoinCount, heart;  //  HUD and children
 let lvlOneBackground, levelOne, collectibles, lvlOneBase, bricks; //  spites used to construct level one
 let lvlOnePlaformFifthLeftmost, lvlOnePlaformThirdLeft, lvlOneFloorThirdLeft, lvlOneFloorSecond, lvlOneFloorBottom, lvlOneFloorFirstLeft, lvlOneFloorFourthLeft;  //  Platforms that need to be global
-let screenHolder, titleText, buttons, floatText; // screenholder and children
+let screenHolder, titleText, buttons, floatText; // Screenholder and children
 let begin, godMode, dropdown;  // Children of butons
 let infoText, dropdownInfo;  //  Children of floatText
 let coinsInfo, healthInfo, timeInfo, mainRules; // Children of dropdownInfo
@@ -35,7 +35,6 @@ let runAni, landAni, jumpAni, standAni, flyUpAni, flyMidAni, flyDownAni, lightBr
 
 //  Declaring world and camera variables
 let levelState = "startScreen";
-let cameraMovement = 50;
 let wallWidth = 50;
 let totalCoins = 0;
 let totalBigCoins = 6;
@@ -77,7 +76,7 @@ function preload(){
   flyDownAni = loadAni("Assets/Animations/Fly down/frame_00001.png", 1);
   flyMidAni = loadAni("Assets/Animations/Fly Mid/frame_00001.png", 1);
 
-  //  Set delays and scale
+  //  Set delays and scale animations
   runAni.scale = animationScale;
   jumpAni.scale = animationScale;
   landAni.scale = animationScale;
@@ -189,7 +188,8 @@ function setup() {
   //Tiles constructor, but this greatly limits what I would be able to do using the tiles. For example, I 
   //Wouldn't have been able to have the player interact differently will walls and floors.
   
-  levelOne = new Group(); //  Holds all walls, platforms, and floors 
+  //  Holds all walls, platforms, and floors in one group
+  levelOne = new Group(); 
   levelOne.collider = "static";
   levelOne.color = colourMap.get("darkGrey");
   levelOne.visible = false;
@@ -198,16 +198,18 @@ function setup() {
   levelOne.bounciness = 0.05;
   levelOne.wallBounciness = 0.3;
 
-  lvlOneBackground = new Sprite();  //  the background for inside the building
+  //  the background for inside the building
+  lvlOneBackground = new Sprite();  
   lvlOneBackground.x = 0;
   lvlOneBackground.y = 0;
   lvlOneBackground.width = 7000;
   lvlOneBackground.height = 2000;
-  lvlOneBackground.collider = "n";
+  lvlOneBackground.collider = "none";
   lvlOneBackground.color = colourMap.get("lightGrey");
   lvlOneBackground.visible = false;
 
-  lvlOneBase = new levelOne.Sprite(); //  The green base below the level
+  //  The green base below the level
+  lvlOneBase = new levelOne.Sprite(); 
   lvlOneBase.x = 0;
   lvlOneBase.y = lvlOneBackground.y + lvlOneBackground.height - 2;
   lvlOneBase.width = lvlOneBackground.width + wallWidth;
@@ -218,7 +220,7 @@ function setup() {
   //  Randomly create bricks on background
   bricks = new Group();
   bricks.scale = 0.1;
-  bricks.collider = "n";
+  bricks.collider = "none";
   bricks.visible = false;
   for (let i = 0; i < 300; i++){
     let singleBrick = new bricks.Sprite();
@@ -255,6 +257,7 @@ function setup() {
   lvlOneFloorFirstLeft.width = lvlOneBackground.width - wallWidth*6;
   lvlOneFloorFirstLeft.height = wallWidth;
   solidsGroup.push(lvlOneFloorFirstLeft);
+
   let lvlOneFloorFirstRight = new levelOne.Sprite();
   lvlOneFloorFirstRight.x = lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth;
   lvlOneFloorFirstRight.y = lvlOneFloorFirstLeft.y;
@@ -275,6 +278,7 @@ function setup() {
   lvlOneFloorThirdLeft.width = lvlOneBackground.width - wallWidth*20;
   lvlOneFloorThirdLeft.height = wallWidth;
   solidsGroup.push(lvlOneFloorThirdLeft);
+
   let lvlOneFloorThirdRight = new levelOne.Sprite();
   lvlOneFloorThirdRight.x = lvlOneBackground.x + wallWidth*64;
   lvlOneFloorThirdRight.y = lvlOneFloorThirdLeft.y;
@@ -288,6 +292,7 @@ function setup() {
   lvlOneFloorFourthRight.width = lvlOneBackground.width - wallWidth*20;
   lvlOneFloorFourthRight.height = wallWidth;
   solidsGroup.push(lvlOneFloorFourthRight);
+
   lvlOneFloorFourthLeft = new levelOne.Sprite();
   lvlOneFloorFourthLeft.x = -(lvlOneBackground.x + wallWidth*64);
   lvlOneFloorFourthLeft.y = lvlOneFloorFourthRight.y;
@@ -301,6 +306,7 @@ function setup() {
   lvlOneFloorFifthLeft.width = lvlOneBackground.width/2 - wallWidth*7;
   lvlOneFloorFifthLeft.height = wallWidth;
   solidsGroup.push(lvlOneFloorFifthLeft);
+
   let lvlOneFloorFifthRight = new levelOne.Sprite();
   lvlOneFloorFifthRight.x = -lvlOneFloorFifthLeft.x;
   lvlOneFloorFifthRight.y = lvlOneBackground.y - lvlOneBackground.height/2;
@@ -322,12 +328,14 @@ function setup() {
   lvlOnePlaformThirdLeft.width = wallWidth*35;
   lvlOnePlaformThirdLeft.height = wallWidth;
   solidsGroup.push(lvlOnePlaformThirdLeft);
+
   let lvlOnePlaformThirdMiddle = new levelOne.Sprite();
   lvlOnePlaformThirdMiddle.x = lvlOneBackground.x + wallWidth*54;
   lvlOnePlaformThirdMiddle.y = lvlOneFloorSecond.y - wallWidth*4;
   lvlOnePlaformThirdMiddle.width = wallWidth*8;
   lvlOnePlaformThirdMiddle.height = wallWidth;
   solidsGroup.push(lvlOnePlaformThirdMiddle);
+
   let lvlOnePlaformThirdRight = new levelOne.Sprite();
   lvlOnePlaformThirdRight.x = lvlOneBackground.x + wallWidth*56;
   lvlOnePlaformThirdRight.y = lvlOneFloorSecond.y - wallWidth*7;
@@ -348,30 +356,35 @@ function setup() {
   lvlOnePlaformFifthMiddle.width = wallWidth*8;
   lvlOnePlaformFifthMiddle.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthMiddle);
+
   let lvlOnePlaformFifthLeft = new levelOne.Sprite();
   lvlOnePlaformFifthLeft.x = lvlOneBackground.x - wallWidth*8;
   lvlOnePlaformFifthLeft.y = lvlOneFloorFourthRight.y - wallWidth*5;
   lvlOnePlaformFifthLeft.width = wallWidth*5;
   lvlOnePlaformFifthLeft.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthLeft);
+
   let lvlOnePlaformFifthRight = new levelOne.Sprite();
   lvlOnePlaformFifthRight.x = -lvlOnePlaformFifthLeft.x;
   lvlOnePlaformFifthRight.y = lvlOneFloorFourthRight.y - wallWidth*5;
   lvlOnePlaformFifthRight.width = wallWidth*5;
   lvlOnePlaformFifthRight.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthRight);
+
   let lvlOnePlaformFifthRightmost0 = new levelOne.Sprite();
   lvlOnePlaformFifthRightmost0.x = lvlOneBackground.x + wallWidth*42;
   lvlOnePlaformFifthRightmost0.y = lvlOneFloorFourthRight.y - wallWidth*6;
   lvlOnePlaformFifthRightmost0.width = wallWidth*41;
   lvlOnePlaformFifthRightmost0.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthRightmost0);
+
   let lvlOnePlaformFifthRightmost1 = new levelOne.Sprite();
   lvlOnePlaformFifthRightmost1.x = lvlOneBackground.x + wallWidth*68;
   lvlOnePlaformFifthRightmost1.y = lvlOneFloorFourthRight.y - wallWidth*3;
   lvlOnePlaformFifthRightmost1.width = wallWidth*5;
   lvlOnePlaformFifthRightmost1.height = wallWidth;
   solidsGroup.push(lvlOnePlaformFifthRightmost1);
+
   lvlOnePlaformFifthLeftmost = new levelOne.Sprite();
   lvlOnePlaformFifthLeftmost.x = lvlOneBackground.x - wallWidth*65;
   lvlOnePlaformFifthLeftmost.y = lvlOneFloorFourthRight.y - wallWidth*4;
@@ -386,18 +399,21 @@ function setup() {
   lvlOneWallFirst0.width = wallWidth;
   lvlOneWallFirst0.height = wallWidth*3;
   lvlOneWallFirst0.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallFirst1 = new levelOne.Sprite();
   lvlOneWallFirst1.x = lvlOneWallFirst0.x + wallWidth*15;
   lvlOneWallFirst1.y = lvlOneWallFirst0.y;
   lvlOneWallFirst1.width = wallWidth;
   lvlOneWallFirst1.height = lvlOneWallFirst0.height;
   lvlOneWallFirst1.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallFirst2 = new levelOne.Sprite();
   lvlOneWallFirst2.x = lvlOneWallFirst0.x + wallWidth*55;
   lvlOneWallFirst2.y = lvlOneWallFirst0.y;
   lvlOneWallFirst2.width = wallWidth;
   lvlOneWallFirst2.height = lvlOneWallFirst0.height;
   lvlOneWallFirst2.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallFirst3 = new levelOne.Sprite();
   lvlOneWallFirst3.x = lvlOneBackground.x + wallWidth*45;
   lvlOneWallFirst3.y = lvlOneWallFirst0.y;
@@ -411,12 +427,14 @@ function setup() {
   lvlOneWallSecond0.width = wallWidth;
   lvlOneWallSecond0.height = wallWidth*2;
   lvlOneWallSecond0.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallSecond1 = new levelOne.Sprite();
   lvlOneWallSecond1.x =  lvlOneWallSecond0.x + wallWidth*30;
   lvlOneWallSecond1.y = lvlOneWallSecond0.y;
   lvlOneWallSecond1.width = wallWidth;
   lvlOneWallSecond1.height = wallWidth*2;
   lvlOneWallSecond1.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallSecond2 = new levelOne.Sprite();
   lvlOneWallSecond2.x =  lvlOneWallSecond0.x + wallWidth*70;
   lvlOneWallSecond2.y = lvlOneWallSecond0.y;
@@ -430,6 +448,7 @@ function setup() {
   lvlOneWallThird0.width = wallWidth;
   lvlOneWallThird0.height = wallWidth*5;
   lvlOneWallThird0.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallThird1 = new levelOne.Sprite();
   lvlOneWallThird1.x = lvlOneBackground.x + wallWidth*58;
   lvlOneWallThird1.y = lvlOneWallThird0.y;
@@ -443,12 +462,14 @@ function setup() {
   lvlOneWallFourth0.width = wallWidth;
   lvlOneWallFourth0.height = wallWidth*3;
   lvlOneWallFourth0.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallFourth1 = new levelOne.Sprite();
   lvlOneWallFourth1.x = lvlOneBackground.x - wallWidth*20;
   lvlOneWallFourth1.y = (lvlOneFloorThirdLeft.y + lvlOneFloorFourthLeft.y)/2 - wallWidth*1;
   lvlOneWallFourth1.width = wallWidth;
   lvlOneWallFourth1.height =lvlOneWallFourth0.height;
   lvlOneWallFourth1.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallFourth2 = new levelOne.Sprite();
   lvlOneWallFourth2.x = lvlOneBackground.x + wallWidth*20;
   lvlOneWallFourth2.y = (lvlOneFloorThirdLeft.y + lvlOneFloorFourthLeft.y)/2 - wallWidth*1;
@@ -462,6 +483,7 @@ function setup() {
   lvlOneWallFifth0.width = wallWidth;
   lvlOneWallFifth0.height = wallWidth*10;
   lvlOneWallFifth0.bounciness = levelOne.wallBounciness;
+
   let lvlOneWallFifth1 = new levelOne.Sprite();
   lvlOneWallFifth1.x = lvlOneBackground.x + wallWidth*22;
   lvlOneWallFifth1.y = lvlOneWallFifth0.y; 
@@ -469,7 +491,7 @@ function setup() {
   lvlOneWallFifth1.height = wallWidth*10;
   lvlOneWallFifth1.bounciness = levelOne.wallBounciness;
 
-  //  Place player and flag at the top of the level
+  //  Place player and "flag" at the top of the level
   player.y = -lvlOneBackground.height/2 - wallWidth*1.5;
   player.x = lvlOneBackground.width/2 - wallWidth*5;
 
@@ -518,7 +540,7 @@ function setup() {
   lazerBottom.y = lvlOneFloorBottom.y - wallWidth*3;
   lazerBottom.height = wallWidth*5;
   lazerBottom.width = lazers.thickness*35;
-  lazerBottom.interval = 1600;
+  lazerBottom.interval = 2600;
 
   let lazerMiddle = new lazers.Sprite();
   lazerMiddle.x = lvlOneBackground.x;
@@ -628,6 +650,7 @@ function setup() {
   titleText.text = "  THE GAME.";
   titleText.textColor = colourMap.get("darkRed");
 
+  //  Create buttons
   buttons = new screenHolder.Group();
   buttons.width = wallWidth*5;
   buttons.height = wallWidth*3;
@@ -656,6 +679,7 @@ function setup() {
   dropdown.lastSwitched = 0;
   dropdown.waitTime = 200;
 
+  //  Create text boxes
   floatText = new screenHolder.Group();
   floatText.width = wallWidth*5;
   floatText.height = wallWidth;
@@ -731,8 +755,8 @@ function draw() {
 
   //  Draw level one
   else if (levelState === "levelOne" || levelState === "godMode"){
+    //  Do initial functions
     initialiseLevel();
-    //  Do all detection functions
     managePlayerStates();
     detectPlayerImput();
     checkWallet();
@@ -774,6 +798,54 @@ function draw() {
     initialiseScreen();
     screenHolder.draw();
     detectMouseImputs();
+  }
+}
+
+function mousePressed(){
+  if(!wind.isPlaying()){
+    wind.loop();
+  }
+}
+
+function keyPressed(){
+  //  Player Movements
+  if (keyCode === 32){  //  (SPACE)
+    //  If player is on ground, use main jump. If not, use double jump
+    if (player.isOnGround){
+      jump.play();
+      player.applyForceScaled(0, -400);      
+    }
+    else if (player.doubleJump && !player.isOnGround){
+      jetPack0.play();
+      if (animationOn){
+        player.changeAni(["jump", "fly up"]);
+      }
+      player.applyForceScaled(0, -300);
+      player.doubleJump = false;
+    }
+  }
+  
+  if (keyCode === 16 && player.dash){  //  (SHIFT) 
+    let waitTime = 1000;
+    //  Dash in the direction player is facing, but only when cooldown allows
+    if (millis() > waitTime + player.lastSwitchedDash){
+      jetPack0.play();
+      if (player.bearing === 360){
+        player.applyForceScaled(800, 0);
+      }
+      else if (player.bearing === 180){
+        player.applyForceScaled(-800, 0);
+      }
+      player.lastSwitchedDash = millis();
+    }
+  }
+
+  //  Animation controll
+  if (keyCode === 65 || keyCode === LEFT_ARROW){
+    player.mirror.x = true;
+  }
+  else if (keyCode === 68 || keyCode === RIGHT_ARROW){
+    player.mirror.x = false;
   }
 }
 
@@ -837,54 +909,6 @@ function initialiseScreen(){
   }
 }
 
-function mousePressed(){
-  if(!wind.isPlaying()){
-    wind.loop();
-  }
-}
-
-function keyPressed(){
-  //  Player Movements
-  if (keyCode === 32){  //  (SPACE)
-    //  If player is on ground, use main jump. If not, use double jump
-    if (player.isOnGround){
-      jump.play();
-      player.applyForceScaled(0, -400);      
-    }
-    else if (player.doubleJump && !player.isOnGround){
-      jetPack0.play();
-      if (animationOn){
-        player.changeAni(["jump", "fly up"]);
-      }
-      player.applyForceScaled(0, -300);
-      player.doubleJump = false;
-    }
-  }
-  
-  if (keyCode === 16 && player.dash){  //  (SHIFT) 
-    let waitTime = 1000;
-    //  Dash in the direction player is facing, but only when cooldown allows
-    if (millis() > waitTime + player.lastSwitchedDash){
-      jetPack0.play();
-      if (player.bearing === 360){
-        player.applyForceScaled(800, 0);
-      }
-      else if (player.bearing === 180){
-        player.applyForceScaled(-800, 0);
-      }
-      player.lastSwitchedDash = millis();
-    }
-  }
-
-  //  Animation controll
-  if (keyCode === 65 || keyCode === LEFT_ARROW){
-    player.mirror.x = true;
-  }
-  else if (keyCode === 68 || keyCode === RIGHT_ARROW){
-    player.mirror.x = false;
-  }
-}
-
 function detectPlayerImput(){
   //  Player Movement left
   if ((keyIsDown(65) || keyIsDown(LEFT_ARROW)) && player.vel.x >= -player.maxSpeed){  //  A (LEFT)
@@ -924,7 +948,7 @@ function detectPlayerImput(){
 }
 
 function managePlayerStates(){
-  //  Evaluates and changes the states of the player depending on whats happening
+  //  Evaluates and changes the states of variables depending on whats happening to the player
   player.isOnGround = false;
   //  If touching any ground object set variables to true
   for (let i = 0; i < solidsGroup.length; i++){ 
@@ -966,6 +990,13 @@ function managePlayerStates(){
       youLose.play();
     }
   }
+  //  If the player is out of building, make wind louder
+  if (player.y <= lvlOneBackground.y - lvlOneBackground.height/2){
+    wind.setVolume(3);
+  }
+  else {
+    wind.setVolume(1);
+  }
 }
 
 function manageAnimations(){
@@ -983,17 +1014,18 @@ function manageAnimations(){
         }
       }
     }
-    //  The rest of the player movements
+    //  Play the rest of the player movements only if jump and land animations aren't playing
     if (player.ani.name !== "land" && player.ani.name !== "jump"){
       if (player.isWalking && player.isOnGround){
         player.changeAni("run");
 
       }
+      //  changes animation depending on if moving up or down
       else if (!player.isOnGround){
-        if (player.vel.y < -3){
+        if (player.vel.y < 0){
           player.changeAni(["fly up", "fly mid"]);
         }
-        else if (player.vel.y > 3){
+        else if (player.vel.y > 0){
           player.changeAni("fly down");
         }
       }
@@ -1024,7 +1056,7 @@ function deathCoolDown(){
 }
 
 function collectItems(player, itemSpirte){
-  //  Puts the coin in the player's wallet then removes it
+  //  Puts the coin in the player's wallet then removes it from the world
   if (itemSpirte.special === true){
     player.wallet[1] = player.wallet[1] + 1;
     collectBigCoin.play();
@@ -1080,7 +1112,7 @@ function resetGame(){
 }
 
 function lazerFlash(lazerThing){
-  //  Makes the lazers flash in whatever interval
+  //  Makes the lazers flash in given interval
   if (millis() > lazerThing.interval + lazerThing.lastSwitched){
     lazerThing.isSolid = ! lazerThing.isSolid;
     if (lazerThing.isSolid){
@@ -1098,14 +1130,14 @@ function lazerFlash(lazerThing){
 function detectMouseImputs(){
   //  Detects when the mouse is hovering over butttons
   if (begin.mouse.hovering() || godMode.mouse.hovering() || dropdown.mouse.hovering()){
-    //  Highlight begin game button
+    //  Highlighting begin game button
     if (begin.mouse.hovering()){  
       infoText.text = "Begin the game.";
       begin.color = colourMap.get("red");
       infoText.visible = true;
       detectMouseClick(begin);
     }
-    //   Highlight God mode button
+    //   Highlighting God mode button
     else if (godMode.mouse.hovering()){ 
       infoText.text = `Begin the game but 
       in god mode. While in god mode, you 
@@ -1114,7 +1146,7 @@ function detectMouseImputs(){
       infoText.visible = true;
       detectMouseClick(godMode);
     }
-    //  Highlight dropdown button
+    //  Highlighting dropdown button
     else if (millis() > dropdown.lastSwitched + dropdown.waitTime){ 
       dropdown.color = colourMap.get("red");
       detectMouseClick(dropdown);
@@ -1168,21 +1200,27 @@ function createCollectibles(){
   for (let theSprites of collectibles){
     theSprites.remove();
   }
+
   let bigCoin1 = new collectibles.Sprite();
   bigCoin1.y = lvlOnePlaformFifthLeftmost.y - wallWidth*5;
   bigCoin1.x = -lvlOneBackground.width/2 + wallWidth*3;
+
   let bigCoin2 = new collectibles.Sprite();
   bigCoin2.y = lvlOnePlaformFifthLeftmost.y - wallWidth*4;
   bigCoin2.x = lvlOneBackground.x + wallWidth*24;
+
   let bigCoin3 = new collectibles.Sprite();
   bigCoin3.y = lvlOneFloorThirdLeft.y - wallWidth*2;
   bigCoin3.x = -lvlOneBackground.width/2 + wallWidth*2;
+
   let bigCoin4 = new collectibles.Sprite();
   bigCoin4.y = lvlOneFloorSecond.y - wallWidth*6;
   bigCoin4.x = lvlOneBackground.x - wallWidth*28;
+  
   let bigCoin5 = new collectibles.Sprite();
   bigCoin5.y = lvlOneFloorSecond.y - wallWidth*6;
   bigCoin5.x = lvlOneBackground.width/2 - wallWidth*2;
+
   let bigCoin6 = new collectibles.Sprite();
   bigCoin6.y = lvlOneFloorBottom.y - wallWidth*2;
   bigCoin6.x = -lvlOneBackground.width/2 + wallWidth*2;
@@ -1194,6 +1232,7 @@ function createCollectibles(){
   let floor3 = 4;
   let floor4 = 6;
   totalCoins = floor0 + floor1 + floor2 + floor3 + floor4;
+
   //  Draw coins randomly on each floor
   for (let i = 0; i < totalCoins; i++){
     let coin = new collectibles.Sprite();
@@ -1224,7 +1263,7 @@ function createCollectibles(){
     coin.x = random(lvlOneBackground.x - lvlOneBackground.width/2 + wallWidth, lvlOneBackground.x + lvlOneBackground.width/2 - wallWidth);
   }
   //  Uncomment the below line of code to put the coins at the top of the level
-  // collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;
+  // collectibles.y = lvlOneBackground.y - lvlOneBackground.height/2 - wallWidth*2;d
 }
 
 function walkSound(){
